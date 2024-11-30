@@ -29,7 +29,7 @@ public:
 	void ImGUI();
 
 	float Random(float min, float max);
-	vec3 Random(vec3 min, vec3 max);
+	math::vec3 Random(math::vec3 min, math::vec3 max);
 };
 
 #endif

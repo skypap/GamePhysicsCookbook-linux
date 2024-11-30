@@ -18,9 +18,9 @@ void SimpleSprings::Initialize(int width, int height) {
 	size_imgui_window = true;
 	lastFrameTime = GetMilliseconds();
 
-	camera.SetTarget(vec3(3.75622f, 2.98255f, 0.0f));
+	camera.SetTarget(math::vec3(3.75622f, 2.98255f, 0.0f));
 	camera.SetZoom(9.0f);
-	camera.SetRotation(vec2(-67.9312f, 19.8f));
+	camera.SetRotation(math::vec2(-67.9312f, 19.8f));
 
 	ResetDemo();
 }
@@ -32,16 +32,16 @@ void SimpleSprings::ResetDemo() {
 	physicsSystem.ClearSprings();
 
 	OBB ground;
-	ground.size = vec3(10.0f, 0.15f, 10.0f);
+	ground.size = math::vec3(10.0f, 0.15f, 10.0f);
 
 
 	physicsSystem.AddConstraint(ground);
 
 	particles.push_back(Particle());
 	particles.push_back(Particle());
-	particles[0].SetPosition(vec3(0, 6, 0));
+	particles[0].SetPosition(math::vec3(0, 6, 0));
 	particles[0].SetMass(50.0f);
-	particles[1].SetPosition(vec3(2, 6, 0));
+	particles[1].SetPosition(math::vec3(2, 6, 0));
 	physicsSystem.AddRigidbody(&particles[0]);
 	physicsSystem.AddRigidbody(&particles[1]);
 	
@@ -113,7 +113,7 @@ void SimpleSprings::Update(float dt) {
 	// in case the simulation becomes unstable and something 
 	// falls below the floor of the world!
 	for (int i = 0; i < particles.size(); ++i) {
-		vec3 position = particles[i].GetPosition();
+		math::vec3 position = particles[i].GetPosition();
 		if (position.y < -5.0f) {
 			position.y = -5.0f;
 			particles[i].SetPosition(position);
@@ -137,8 +137,8 @@ float SimpleSprings::Random(float min, float max) {
 	return (random*range) + min;
 }
 
-vec3 SimpleSprings::Random(vec3 min, vec3 max) {
-	vec3 result;
+math::vec3 SimpleSprings::Random(math::vec3 min, math::vec3 max) {
+	math::vec3 result;
 	result.x = Random(min.x, max.x);
 	result.y = Random(min.y, max.y);
 	result.z = Random(min.z, max.z);

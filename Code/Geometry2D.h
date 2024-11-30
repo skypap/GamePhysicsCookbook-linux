@@ -1,11 +1,11 @@
 #ifndef _H_GEOMETRY_2D
 #define _H_GEOMETRY_2D
 
-#include "vectors.h"
+#include "math_config.h"
 
 #include <ostream>
 
-typedef vec2 Point2D;
+typedef math::vec2 Point2D;
 
 typedef struct Line2D {
 	Point2D start;
@@ -27,23 +27,23 @@ typedef struct Circle {
 
 typedef struct Rectangle2D {
 	Point2D origin;
-	vec2 size;
+	math::vec2 size;
 
 	inline Rectangle2D() : size(1, 1) { }
-	inline Rectangle2D(const Point2D& o, const vec2& s) :
+	inline Rectangle2D(const Point2D& o, const math::vec2& s) :
 		origin(o), size(s) { }
 } Rectangle2D;
 
 typedef struct OrientedRectangle {
 	Point2D position;
-	vec2 halfExtents;
+	math::vec2 halfExtents;
 	float rotation;
 
 	inline OrientedRectangle() :
 		halfExtents(1.0f, 1.0f), rotation(0.0f) { }
-	inline OrientedRectangle(const Point2D& pos, const vec2& ext) :
+	inline OrientedRectangle(const Point2D& pos, const math::vec2& ext) :
 		position(pos), halfExtents(ext), rotation(0.0f) { }
-	inline OrientedRectangle(const Point2D& pos, const vec2& ext, float rot) :
+	inline OrientedRectangle(const Point2D& pos, const math::vec2& ext, float rot) :
 		position(pos), halfExtents(ext), rotation(rot) { }
 } OrientedRectangle;
 
@@ -65,9 +65,9 @@ typedef struct Interval2D {
 
 float Length(const Line2D& line);
 float LengthSq(const Line2D& line);
-vec2 GetMin(const Rectangle2D& rect);
-vec2 GetMax(const Rectangle2D& rect);
-Rectangle2D FromMinMax(const vec2& min, const vec2& max);
+math::vec2 GetMin(const Rectangle2D& rect);
+math::vec2 GetMax(const Rectangle2D& rect);
+Rectangle2D FromMinMax(const math::vec2& min, const math::vec2& max);
 
 bool PointOnLine(const Point2D& point, const Line2D& line);
 bool PointInCircle(const Point2D& point, const Circle& circle);
@@ -113,17 +113,17 @@ bool CircleOrientedRectangle(const Circle& circle, const OrientedRectangle& rect
 	CircleOrientedRectangle(circle, rectangle)
 bool RectangleRectangle(const Rectangle2D& rect1, const Rectangle2D& rect2);
 
-Interval2D GetInterval(const Rectangle2D& rect, const vec2& axis);
-bool OverlapOnAxis(const Rectangle2D& rect1, const Rectangle2D& rect2, const vec2& axis);
+Interval2D GetInterval(const Rectangle2D& rect, const math::vec2& axis);
+bool OverlapOnAxis(const Rectangle2D& rect1, const Rectangle2D& rect2, const math::vec2& axis);
 bool RectangleRectangleSAT(const Rectangle2D& rect1, const Rectangle2D& rect2);
 
-Interval2D GetInterval(const OrientedRectangle& rect, const vec2& axis);
-bool OverlapOnAxis(const Rectangle2D& rect1, const OrientedRectangle& rect2, const vec2& axis);
+Interval2D GetInterval(const OrientedRectangle& rect, const math::vec2& axis);
+bool OverlapOnAxis(const Rectangle2D& rect1, const OrientedRectangle& rect2, const math::vec2& axis);
 bool RectangleOrientedRectangle(const Rectangle2D& rect1, const OrientedRectangle& rect2);
 #define OrientedRectangleRectangle(oriented, regular) \
 	RectangleOrientedRectangle(regular, oriented)
 
-bool OverlapOnAxis(const OrientedRectangle& rect1, const OrientedRectangle& rect2, const vec2& axis);
+bool OverlapOnAxis(const OrientedRectangle& rect1, const OrientedRectangle& rect2, const math::vec2& axis);
 bool OrientedRectangleOrientedRectangleSAT(const OrientedRectangle& rect1, const OrientedRectangle& rect2);
 bool OrientedRectangleOrientedRectangle(const OrientedRectangle& rect1, const OrientedRectangle& rect2);
 

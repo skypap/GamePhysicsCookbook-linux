@@ -41,7 +41,7 @@ public:
 	std::vector<Model*> Query(const Sphere& sphere);
 	std::vector<Model*> Query(const AABB& aabb);
 
-	bool Accelerate(const vec3& position, float size); 
+	bool Accelerate(const math::vec3& position, float size);
 	std::vector<Model*> Cull(const Frustum& f);
 };
 

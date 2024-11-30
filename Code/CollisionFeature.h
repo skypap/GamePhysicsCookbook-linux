@@ -10,9 +10,9 @@ protected:
 	OBB obb[2];
 
 	float* manipulator;
-	mat4 manTranslation;
-	mat4 manRotation;
-	mat4 manScale;
+	math::mat4 manTranslation;
+	math::mat4 manRotation;
+	math::mat4 manScale;
 	int manipulating;
 	bool transformWorld;
 	bool size_imgui_window;

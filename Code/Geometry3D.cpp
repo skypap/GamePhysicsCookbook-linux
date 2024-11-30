@@ -1,49 +1,49 @@
 #include "Geometry3D.h"
 #include <cmath>
-#include <cfloat>
+#include <cmath>
 #include <list>
 
 #define CMP(x, y) \
 	(fabsf(x - y) <= FLT_EPSILON * fmaxf(1.0f, fmaxf(fabsf(x), fabsf(y))))
 
-float Length(const Line& line) {
-	return Magnitude(line.start - line.end);
+math::real Length(const Line& line) {
+	return math::length(line.start - line.end);
 }
 
-float LengthSq(const Line& line) {
-	return MagnitudeSq(line.start - line.end);
+math::real LengthSq(const Line& line) {
+	return math::lengthSq(line.start - line.end);
 }
 
 Ray FromPoints(const Point& from, const Point& to) {
 	return Ray(
 		from,
-		Normalized(to - from)
+		math::normalized(to - from)
 	);
 }
 
-vec3 GetMin(const AABB& aabb) {
-	vec3 p1 = aabb.position + aabb.size;
-	vec3 p2 = aabb.position - aabb.size;
+math::vec3 GetMin(const AABB& aabb) {
+	math::vec3 p1 = aabb.position + aabb.size;
+	math::vec3 p2 = aabb.position - aabb.size;
 
-	return vec3(fminf(p1.x, p2.x), fminf(p1.y, p2.y), fminf(p1.z, p2.z));
+	return math::vec3(fminf(p1.x, p2.x), fminf(p1.y, p2.y), fminf(p1.z, p2.z));
 }
-vec3 GetMax(const AABB& aabb) {
-	vec3 p1 = aabb.position + aabb.size;
-	vec3 p2 = aabb.position - aabb.size;
+math::vec3 GetMax(const AABB& aabb) {
+	math::vec3 p1 = aabb.position + aabb.size;
+	math::vec3 p2 = aabb.position - aabb.size;
 
-	return vec3(fmaxf(p1.x, p2.x), fmaxf(p1.y, p2.y), fmaxf(p1.z, p2.z));
+	return math::vec3(fmaxf(p1.x, p2.x), fmaxf(p1.y, p2.y), fmaxf(p1.z, p2.z));
 }
 
-AABB FromMinMax(const vec3& min, const vec3& max) {
+AABB FromMinMax(const math::vec3& min, const math::vec3& max) {
 	return AABB((min + max) * 0.5f, (max - min) * 0.5f);
 }
 
-float PlaneEquation(const Point& point, const Plane& plane) {
-	return Dot(point, plane.normal) - plane.distance;
+math::real PlaneEquation(const Point& point, const Plane& plane) {
+	return math::dot(point, plane.normal) - plane.distance;
 }
 
-float PlaneEquation(const Plane& plane, const Point& point) {
-	return Dot(point, plane.normal) - plane.distance;
+math::real PlaneEquation(const Plane& plane, const Point& point) {
+	return math::dot(point, plane.normal) - plane.distance;
 }
 
 std::ostream& operator<<(std::ostream& os, const Line& shape) {
@@ -65,8 +65,8 @@ std::ostream& operator<<(std::ostream& os, const Sphere& shape) {
 }
 
 std::ostream& operator<<(std::ostream& os, const AABB& shape) {
-	vec3 min = GetMin(shape);
-	vec3 max = GetMax(shape);
+	math::vec3 min = GetMin(shape);
+	math::vec3 max = GetMax(shape);
 	os << "min: (" << min.x << ", " << min.y << ", " << min.z << "), ";
 	os << "max: (" << max.x << ", " << max.y << ", " << max.z << ")";
 	return os;
@@ -86,23 +86,23 @@ std::ostream& operator<<(std::ostream& os, const Triangle& shape) {
 }
 
 std::ostream& operator<<(std::ostream& os, const OBB& shape) {
-	os << "position:" << shape.position.x << ", " << shape.position.y << ", " << shape.position.z << "), ";
-	os << "size:" << shape.size.x << ", " << shape.size.y << ", " << shape.size.z << "), ";
-	os << "x basis:" << shape.orientation._11 << ", " << shape.orientation._21 << ", " << shape.orientation._31 << "), ";
-	os << "y basis:" << shape.orientation._12 << ", " << shape.orientation._22 << ", " << shape.orientation._32 << "), ";
-	os << "z basis:" << shape.orientation._13 << ", " << shape.orientation._23 << ", " << shape.orientation._33 << ")";
+	os << "position: (" << shape.position.x << ", " << shape.position.y << ", " << shape.position.z << "), ";
+	os << "size: (" << shape.size.x << ", " << shape.size.y << ", " << shape.size.z << "), ";
+	os << "x basis: (" << shape.orientation[0].x << ", " << shape.orientation[0].y << ", " << shape.orientation[0].z << "), ";
+	os << "y basis: (" << shape.orientation[1].x << ", " << shape.orientation[1].y << ", " << shape.orientation[1].z << "), ";
+	os << "z basis: (" << shape.orientation[2].x << ", " << shape.orientation[2].y << ", " << shape.orientation[2].z << ")";
 	return os;
 }
 
 bool PointInSphere(const Point& point, const Sphere& sphere) {
-	return MagnitudeSq(point - sphere.position) < sphere.radius * sphere.radius;
+	return math::lengthSq(point - sphere.position) < sphere.radius * sphere.radius;
 }
 
 bool PointOnPlane(const Point& point, const Plane& plane) {
 	// This should probably use an epsilon!
-	//return Dot(point, plane.normal) - plane.distance == 0.0f;
+	//return math::dot(point, plane.normal) - plane.distance == 0.0f;
 
-	return CMP(Dot(point, plane.normal) - plane.distance, 0.0f);
+	return CMP(math::dot(point, plane.normal) - plane.distance, 0.0f);
 }
 
 bool PointInAABB(const Point& point, const AABB& aabb) {
@@ -120,18 +120,15 @@ bool PointInAABB(const Point& point, const AABB& aabb) {
 }
 
 bool PointInOBB(const Point& point, const OBB& obb) {
-	vec3 dir = point - obb.position;
+	math::vec3 dir = point - obb.position;
 
 	for (int i = 0; i < 3; ++i) {
-		const float* orientation = &obb.orientation.asArray[i * 3];
-		vec3 axis(orientation[0], orientation[1], orientation[2]);
+		// On peut accéder directement à la colonne i de la matrice
+		math::vec3 axis = obb.orientation[i];  // GLM permet l'accès direct aux colonnes
+		math::real distance = math::dot(dir, axis);
 
-		float distance = Dot(dir, axis);
-
-		if (distance > obb.size.asArray[i]) {
-			return false;
-		}
-		if (distance < -obb.size.asArray[i]) {
+		// Accès direct au composant i du vecteur size
+		if (std::abs(distance) > obb.size[i]) {
 			return false;
 		}
 	}
@@ -140,8 +137,8 @@ bool PointInOBB(const Point& point, const OBB& obb) {
 }
 
 Point ClosestPoint(const Sphere& sphere, const Point& point) {
-	vec3 sphereToPoint = point - sphere.position;
-	Normalize(sphereToPoint);
+	math::vec3 sphereToPoint = point - sphere.position;
+	math::normalized(sphereToPoint);
 	sphereToPoint = sphereToPoint * sphere.radius;
 	return sphereToPoint + sphere.position;
 }
@@ -164,48 +161,45 @@ Point ClosestPoint(const AABB& aabb, const Point& point) {
 
 Point ClosestPoint(const OBB& obb, const Point& point) {
 	Point result = obb.position;
-	vec3 dir = point - obb.position;
+	math::vec3 dir = point - obb.position;
 
 	for (int i = 0; i < 3; ++i) {
-		const float* orientation = &obb.orientation.asArray[i * 3];
-		vec3 axis(orientation[0], orientation[1], orientation[2]);
+		math::vec3 axis = obb.orientation[i];
+		math::real distance = math::dot(dir, axis);
 
-		float distance = Dot(dir, axis);
-
-		if (distance > obb.size.asArray[i]) {
-			distance = obb.size.asArray[i];
+		if (distance > obb.size[i]) {
+			distance = obb.size[i];
 		}
-		if (distance < -obb.size.asArray[i]) {
-			distance = -obb.size.asArray[i];
+		if (distance < -obb.size[i]) {
+			distance = -obb.size[i];
 		}
 
-		result = result + (axis * distance);
+		result += axis * distance;
 	}
 
 	return result;
 }
-
 Point ClosestPoint(const Plane& plane, const Point& point) {
-	// This works assuming plane.Normal is normalized, which it should be
-	float distance = Dot(plane.normal, point) - plane.distance;
-	// If the plane normal wasn't normalized, we'd need this:
-	// distance = distance / DOT(plane.Normal, plane.Normal);
+	// This works assuming plane.Normal is math::normalized, which it should be
+	math::real distance = math::dot(plane.normal, point) - plane.distance;
+	// If the plane normal wasn't math::normalized, we'd need this:
+	// distance = distance / math::dot(plane.Normal, plane.Normal);
 
 	return point - plane.normal * distance;
 }
 
 bool PointOnLine(const Point& point, const Line& line) {
 	Point closest = ClosestPoint(line, point);
-	float distanceSq = MagnitudeSq(closest - point);
+	math::real distanceSq = math::lengthSq(closest - point);
 	return CMP(distanceSq, 0.0f);
 }
 
 Point ClosestPoint(const Line& line, const Point& point) {
-	vec3 lVec = line.end - line.start; // Line Vector
-	// Project "point" onto the "Line Vector", computing:
+	math::vec3 lVec = line.end - line.start; // Line Vector
+	// math::project "point" onto the "Line Vector", computing:
 	// closest(t) = start + t * (end - start)
 	// T is how far along the line the projected point is
-	float t = Dot(point - line.start, lVec) / Dot(lVec, lVec);
+	math::real t = math::dot(point - line.start, lVec) / math::dot(lVec, lVec);
 	// Clamp t to the 0 to 1 range
 	t = fmaxf(t, 0.0f);
 	t = fminf(t, 1.0f);
@@ -218,18 +212,18 @@ bool PointOnRay(const Point& point, const Ray& ray) {
 		return true;
 	}
 
-	vec3 norm = point - ray.origin;
-	Normalize(norm);
-	float diff = Dot(norm, ray.direction); // Direction is normalized
+	math::vec3 norm = point - ray.origin;
+	math::normalized(norm);
+	math::real diff = math::dot(norm, ray.direction); // Direction is math::normalized
 	// If BOTH vectors point in the same direction, diff should be 1
 	return CMP(diff, 1.0f);
 }
 
 Point ClosestPoint(const Ray& ray, const Point& point) {
-	// Project point onto ray, 
-	float t = Dot(point - ray.origin, ray.direction);
-	// Not needed if direction is normalized!
-	// t /= Dot(ray.direction, ray.direction);
+	// math::project point onto ray,
+	math::real t = math::dot(point - ray.origin, ray.direction);
+	// Not needed if direction is math::normalized!
+	// t /= math::dot(ray.direction, ray.direction);
 
 	// We only want to clamp t in the positive direction.
 	// The ray extends infinatley in this direction!
@@ -237,7 +231,7 @@ Point ClosestPoint(const Ray& ray, const Point& point) {
 
 	// Compute the projected position from the clamped t
 	// Notice we multiply r.Normal by t, not AB.
-	// This is becuase we want the ray in the direction 
+	// This is becuase we want the ray in the direction
 	// of the normal, which technically the line segment is
 	// but this is much more explicit and easy to read.
 	return Point(ray.origin + ray.direction * t);
@@ -311,29 +305,29 @@ Point ClosestPoint(const Point& p, const Triangle& t) {
 }
 
 bool SphereSphere(const Sphere& s1, const Sphere& s2) {
-	float radiiSum = s1.radius + s2.radius;
-	float sqDistance = MagnitudeSq(s1.position - s2.position);
+	math::real radiiSum = s1.radius + s2.radius;
+	math::real sqDistance = math::lengthSq(s1.position - s2.position);
 	return sqDistance < radiiSum * radiiSum;
 }
 
 bool SphereAABB(const Sphere& sphere, const AABB& aabb) {
 	Point closestPoint = ClosestPoint(aabb, sphere.position);
-	float distSq = MagnitudeSq(sphere.position - closestPoint);
-	float radiusSq = sphere.radius * sphere.radius;
+	math::real distSq = math::lengthSq(sphere.position - closestPoint);
+	math::real radiusSq = sphere.radius * sphere.radius;
 	return distSq < radiusSq;
 }
 
 bool SphereOBB(const Sphere& sphere, const OBB& obb) {
 	Point closestPoint = ClosestPoint(obb, sphere.position);
-	float distSq = MagnitudeSq(sphere.position - closestPoint);
-	float radiusSq = sphere.radius * sphere.radius;
+	math::real distSq = math::lengthSq(sphere.position - closestPoint);
+	math::real radiusSq = sphere.radius * sphere.radius;
 	return distSq < radiusSq;
 }
 
 bool SpherePlane(const Sphere& sphere, const Plane& plane) {
 	Point closestPoint = ClosestPoint(plane, sphere.position);
-	float distSq = MagnitudeSq(sphere.position - closestPoint);
-	float radiusSq = sphere.radius * sphere.radius;
+	math::real distSq = math::lengthSq(sphere.position - closestPoint);
+	math::real radiusSq = sphere.radius * sphere.radius;
 	return distSq < radiusSq;
 }
 
@@ -349,21 +343,22 @@ bool AABBAABB(const AABB& aabb1, const AABB& aabb2) {
 }
 
 bool AABBOBB(const AABB& aabb, const OBB& obb) {
-	const float* o = obb.orientation.asArray;
 
-	vec3 test[15] = {
-		vec3(1, 0, 0), // AABB axis 1
-		vec3(0, 1, 0), // AABB axis 2
-		vec3(0, 0, 1), // AABB axis 3
-		vec3(o[0], o[1], o[2]),
-		vec3(o[3], o[4], o[5]),
-		vec3(o[6], o[7], o[8])
-	};
+	math::vec3 test[15] = {
+		// AABB axes (unit vectors)
+		math::vec3(1, 0, 0),  // X axis
+		math::vec3(0, 1, 0),  // Y axis
+		math::vec3(0, 0, 1),  // Z axis
+		// OBB axes (colonnes de la matrice d'orientation)
+		obb.orientation[0],
+		obb.orientation[1],
+		obb.orientation[2]
+};
 
 	for (int i = 0; i < 3; ++i) { // Fill out rest of axis
-		test[6 + i * 3 + 0] = Cross(test[i], test[0]);
-		test[6 + i * 3 + 1] = Cross(test[i], test[1]);
-		test[6 + i * 3 + 2] = Cross(test[i], test[2]);
+		test[6 + i * 3 + 0] = math::cross(test[i], test[0]);
+		test[6 + i * 3 + 1] = math::cross(test[i], test[1]);
+		test[6 + i * 3 + 2] = math::cross(test[i], test[2]);
 	}
 
 	for (int i = 0; i < 15; ++i) {
@@ -375,43 +370,43 @@ bool AABBOBB(const AABB& aabb, const OBB& obb) {
 	return true; // Seperating axis not found
 }
 
-bool OverlapOnAxis(const AABB& aabb, const OBB& obb, const vec3& axis) {
+bool OverlapOnAxis(const AABB& aabb, const OBB& obb, const math::vec3& axis) {
 	Interval a = GetInterval(aabb, axis);
 	Interval b = GetInterval(obb, axis);
 	return ((b.min <= a.max) && (a.min <= b.max));
 }
 
-bool OverlapOnAxis(const OBB& obb1, const OBB& obb2, const vec3& axis) {
+bool OverlapOnAxis(const OBB& obb1, const OBB& obb2, const math::vec3& axis) {
 	Interval a = GetInterval(obb1, axis);
 	Interval b = GetInterval(obb1, axis);
 	return ((b.min <= a.max) && (a.min <= b.max));
 }
 
-bool OverlapOnAxis(const AABB& aabb, const Triangle& triangle, const vec3& axis) {
+bool OverlapOnAxis(const AABB& aabb, const Triangle& triangle, const math::vec3& axis) {
 	Interval a = GetInterval(aabb, axis);
 	Interval b = GetInterval(triangle, axis);
 	return ((b.min <= a.max) && (a.min <= b.max));
 }
 
-bool OverlapOnAxis(const OBB& obb, const Triangle& triangle, const vec3& axis) {
+bool OverlapOnAxis(const OBB& obb, const Triangle& triangle, const math::vec3& axis) {
 	Interval a = GetInterval(obb, axis);
 	Interval b = GetInterval(triangle, axis);
 	return ((b.min <= a.max) && (a.min <= b.max));
 }
 
-bool OverlapOnAxis(const Triangle& t1, const Triangle& t2, const vec3& axis) {
+bool OverlapOnAxis(const Triangle& t1, const Triangle& t2, const math::vec3& axis) {
 	Interval a = GetInterval(t1, axis);
 	Interval b = GetInterval(t2, axis);
 	return ((b.min <= a.max) && (a.min <= b.max));
 }
 
-Interval GetInterval(const Triangle& triangle, const vec3& axis) {
+Interval GetInterval(const Triangle& triangle, const math::vec3& axis) {
 	Interval result;
 
-	result.min = Dot(axis, triangle.GetPoint(0));
+	result.min = math::dot(axis, triangle.GetPoint(0));
 	result.max = result.min;
 	for (int i = 1; i < 3; ++i) {
-		float value = Dot(axis, triangle.GetPoint(i));
+		math::real value = math::dot(axis, triangle.GetPoint(i));
 		result.min = fminf(result.min, value);
 		result.max = fmaxf(result.max, value);
 	}
@@ -419,17 +414,16 @@ Interval GetInterval(const Triangle& triangle, const vec3& axis) {
 	return result;
 }
 
-Interval GetInterval(const OBB& obb, const vec3& axis) {
-	vec3 vertex[8];
+Interval GetInterval(const OBB& obb, const math::vec3& axis) {
+	math::vec3 vertex[8];
 
-	vec3 C = obb.position;	// OBB Center
-	vec3 E = obb.size;		// OBB Extents
-	const float* o = obb.orientation.asArray;
-	vec3 A[] = {			// OBB Axis
-		vec3(o[0], o[1], o[2]),
-		vec3(o[3], o[4], o[5]),
-		vec3(o[6], o[7], o[8]),
-	};
+	math::vec3 C = obb.position;	// OBB Center
+	math::vec3 E = obb.size;		// OBB Extents
+	const math::vec3 A[] = {        // OBB Axis
+		obb.orientation[0],         // X axis
+		obb.orientation[1],         // Y axis
+		obb.orientation[2]          // Z axis
+ };
 
 	vertex[0] = C + A[0] * E[0] + A[1] * E[1] + A[2] * E[2];
 	vertex[1] = C - A[0] * E[0] + A[1] * E[1] + A[2] * E[2];
@@ -441,10 +435,10 @@ Interval GetInterval(const OBB& obb, const vec3& axis) {
 	vertex[7] = C - A[0] * E[0] - A[1] * E[1] + A[2] * E[2];
 
 	Interval result;
-	result.min = result.max = Dot(axis, vertex[0]);
+	result.min = result.max = math::dot(axis, vertex[0]);
 
 	for (int i = 1; i < 8; ++i) {
-		float projection = Dot(axis, vertex[i]);
+		math::real projection = math::dot(axis, vertex[i]);
 		result.min = (projection < result.min) ? projection : result.min;
 		result.max = (projection > result.max) ? projection : result.max;
 	}
@@ -452,26 +446,26 @@ Interval GetInterval(const OBB& obb, const vec3& axis) {
 	return result;
 }
 
-Interval GetInterval(const AABB& aabb, const vec3& axis) {
-	vec3 i = GetMin(aabb);
-	vec3 a = GetMax(aabb);
+Interval GetInterval(const AABB& aabb, const math::vec3& axis) {
+	math::vec3 i = GetMin(aabb);
+	math::vec3 a = GetMax(aabb);
 
-	vec3 vertex[8] = {
-		vec3(i.x, a.y, a.z),
-		vec3(i.x, a.y, i.z),
-		vec3(i.x, i.y, a.z),
-		vec3(i.x, i.y, i.z),
-		vec3(a.x, a.y, a.z),
-		vec3(a.x, a.y, i.z),
-		vec3(a.x, i.y, a.z),
-		vec3(a.x, i.y, i.z)
+	math::vec3 vertex[8] = {
+		math::vec3(i.x, a.y, a.z),
+		math::vec3(i.x, a.y, i.z),
+		math::vec3(i.x, i.y, a.z),
+		math::vec3(i.x, i.y, i.z),
+		math::vec3(a.x, a.y, a.z),
+		math::vec3(a.x, a.y, i.z),
+		math::vec3(a.x, i.y, a.z),
+		math::vec3(a.x, i.y, i.z)
 	};
 
 	Interval result;
-	result.min = result.max = Dot(axis, vertex[0]);
+	result.min = result.max = math::dot(axis, vertex[0]);
 
 	for (int i = 1; i < 8; ++i) {
-		float projection = Dot(axis, vertex[i]);
+		math::real projection = math::dot(axis, vertex[i]);
 		result.min = (projection < result.min) ? projection : result.min;
 		result.max = (projection > result.max) ? projection : result.max;
 	}
@@ -480,33 +474,32 @@ Interval GetInterval(const AABB& aabb, const vec3& axis) {
 }
 
 bool AABBPlane(const AABB& aabb, const Plane& plane) {
-	// Project the half extents of the AABB onto the plane normal
-	float pLen =aabb.size.x * fabsf(plane.normal.x) +
+	// math::project the half extents of the AABB onto the plane normal
+	math::real pLen =aabb.size.x * fabsf(plane.normal.x) +
 				aabb.size.y * fabsf(plane.normal.y) +
 				aabb.size.z * fabsf(plane.normal.z);
 	// Find the distance from the center of the AABB to the plane
-	float dist = Dot(plane.normal, aabb.position) - plane.distance;
+	math::real dist = math::dot(plane.normal, aabb.position) - plane.distance;
 	// Intersection occurs if the distance falls within the projected side
 	return fabsf(dist) <= pLen;
 }
 
 bool OBBOBB(const OBB& obb1, const OBB& obb2) {
-	const float* o1 = obb1.orientation.asArray;
-	const float* o2 = obb2.orientation.asArray;
-
-	vec3 test[15] = {
-		vec3(o1[0], o1[1], o1[2]),
-		vec3(o1[3], o1[4], o1[5]),
-		vec3(o1[6], o1[7], o1[8]),
-		vec3(o2[0], o2[1], o2[2]),
-		vec3(o2[3], o2[4], o2[5]),
-		vec3(o2[6], o2[7], o2[8])
-	};
+	math::vec3 test[15] = {
+	// Axes de obb1
+	obb1.orientation[0],  // Colonne 0 (axe X)
+	obb1.orientation[1],  // Colonne 1 (axe Y)
+	obb1.orientation[2],  // Colonne 2 (axe Z)
+	// Axes de obb2
+	obb2.orientation[0],  // Colonne 0 (axe X)
+	obb2.orientation[1],  // Colonne 1 (axe Y)
+	obb2.orientation[2]   // Colonne 2 (axe Z)
+};
 
 	for (int i = 0; i < 3; ++i) { // Fill out rest of axis
-		test[6 + i * 3 + 0] = Cross(test[i], test[0]);
-		test[6 + i * 3 + 1] = Cross(test[i], test[1]);
-		test[6 + i * 3 + 2] = Cross(test[i], test[2]);
+		test[6 + i * 3 + 0] = math::cross(test[i], test[0]);
+		test[6 + i * 3 + 1] = math::cross(test[i], test[1]);
+		test[6 + i * 3 + 2] = math::cross(test[i], test[2]);
 	}
 
 	for (int i = 0; i < 15; ++i) {
@@ -520,48 +513,48 @@ bool OBBOBB(const OBB& obb1, const OBB& obb2) {
 
 bool OBBPlane(const OBB& obb, const Plane& plane) {
 	// Local variables for readability only
-	const float* o = obb.orientation.asArray;
-	vec3 rot[] = { // rotation / orientation
-		vec3(o[0], o[1], o[2]),
-		vec3(o[3], o[4], o[5]),
-		vec3(o[6], o[7], o[8]),
-	};
-	vec3 normal = plane.normal;
+	// Récupérer les trois axes d'orientation de l'OBB (colonnes de la matrice)
+	const math::vec3 rot[] = {
+		obb.orientation[0],  // Axe local X
+		obb.orientation[1],  // Axe local Y
+		obb.orientation[2]   // Axe local Z
+};
+	math::vec3 normal = plane.normal;
 
-	// Project the half extents of the AABB onto the plane normal
-	float pLen =obb.size.x * fabsf(Dot(normal, rot[0])) +
-				obb.size.y * fabsf(Dot(normal, rot[1])) +
-				obb.size.z * fabsf(Dot(normal, rot[2]));
+	// math::project the half extents of the AABB onto the plane normal
+	math::real pLen =obb.size.x * fabsf(math::dot(normal, rot[0])) +
+				obb.size.y * fabsf(math::dot(normal, rot[1])) +
+				obb.size.z * fabsf(math::dot(normal, rot[2]));
 	// Find the distance from the center of the OBB to the plane
-	float dist = Dot(plane.normal, obb.position) - plane.distance;
+	math::real dist = math::dot(plane.normal, obb.position) - plane.distance;
 	// Intersection occurs if the distance falls within the projected side
 	return fabsf(dist) <= pLen;
 }
 
 bool PlanePlane(const Plane& plane1, const Plane& plane2) {
 	// Compute direction of intersection line
-	vec3 d = Cross(plane1.normal, plane2.normal);
+	math::vec3 d = math::cross(plane1.normal, plane2.normal);
 
 	// Check the length of the direction line
 	// if the length is 0, no intersection happened
-	return !(CMP(Dot(d, d), 0));
+	return !(CMP(math::dot(d, d), 0));
 
-	// We could have used the dot product here, instead of the cross product
+	// We could have used the math::dot product here, instead of the math::cross product
 }
 
 bool Raycast(const Sphere& sphere, const Ray& ray, RaycastResult* outResult) {
 	ResetRaycastResult(outResult);
 
-	vec3 e = sphere.position - ray.origin;
-	float rSq = sphere.radius * sphere.radius;
+	math::vec3 e = sphere.position - ray.origin;
+	math::real rSq = sphere.radius * sphere.radius;
 
-	float eSq = MagnitudeSq(e);
-	float a = Dot(e, ray.direction); // ray.direction is assumed to be normalized
-	float bSq = /*sqrtf(*/eSq - (a * a)/*)*/;
-	float f = sqrt(fabsf((rSq)- /*(b * b)*/bSq));
+	math::real eSq = math::lengthSq(e);
+	math::real a = math::dot(e, ray.direction); // ray.direction is assumed to be math::normalized
+	math::real bSq = /*sqrtf(*/eSq - (a * a)/*)*/;
+	math::real f = sqrt(fabsf((rSq)- /*(b * b)*/bSq));
 
 	// Assume normal intersection!
-	float t = a - f;
+	math::real t = a - f;
 
 	// No collision has happened
 	if (rSq - (eSq - a * a) < 0.0f) {
@@ -576,152 +569,149 @@ bool Raycast(const Sphere& sphere, const Ray& ray, RaycastResult* outResult) {
 		outResult->t = t;
 		outResult->hit = true;
 		outResult->point = ray.origin + ray.direction * t;
-		outResult->normal = Normalized(outResult->point - sphere.position);
+		outResult->normal = math::normalized(outResult->point - sphere.position);
 	}
 	return true;
 }
 
 bool Raycast(const OBB& obb, const Ray& ray, RaycastResult* outResult) {
-	ResetRaycastResult(outResult);
+   ResetRaycastResult(outResult);
 
-	const float* o = obb.orientation.asArray;
-	const float* size = obb.size.asArray;
+   math::vec3 p = obb.position - ray.origin;
 
-	vec3 p = obb.position - ray.origin;
+   // Axes de l'OBB
+   const math::vec3& X = obb.orientation[0];
+   const math::vec3& Y = obb.orientation[1];
+   const math::vec3& Z = obb.orientation[2];
 
-	vec3 X(o[0], o[1], o[2]);
-	vec3 Y(o[3], o[4], o[5]);
-	vec3 Z(o[6], o[7], o[8]);
+   // Projections du rayon et du vecteur p sur les axes
+   math::vec3 f(
+       math::dot(X, ray.direction),
+       math::dot(Y, ray.direction),
+       math::dot(Z, ray.direction)
+   );
 
-	vec3 f(
-		Dot(X, ray.direction),
-		Dot(Y, ray.direction),
-		Dot(Z, ray.direction)
-	);
-
-	vec3 e(
-		Dot(X, p),
-		Dot(Y, p),
-		Dot(Z, p)
-	);
+   math::vec3 e(
+       math::dot(X, p),
+       math::dot(Y, p),
+       math::dot(Z, p)
+   );
 
 #if 1
-	float t[6] = { 0, 0, 0, 0, 0, 0 };
-	for (int i = 0; i < 3; ++i) {
-		if (CMP(f[i], 0)) {
-			if (-e[i] - size[i] > 0 || -e[i] + size[i] < 0) {
-				return false;
-			}
-			f[i] = 0.00001f; // Avoid div by 0!
-		}
+   math::real t[6] = { 0, 0, 0, 0, 0, 0 };
+   for (int i = 0; i < 3; ++i) {
+       if (CMP(f[i], 0)) {
+           if (-e[i] - obb.size[i] > 0 || -e[i] + obb.size[i] < 0) {
+               return false;
+           }
+           f[i] = 0.00001f; // Avoid div by 0!
+       }
 
-		t[i * 2 + 0] = (e[i] + size[i]) / f[i]; // tmin[x, y, z]
-		t[i * 2 + 1] = (e[i] - size[i]) / f[i]; // tmax[x, y, z]
-	}
+       t[i * 2 + 0] = (e[i] + obb.size[i]) / f[i]; // tmin[x, y, z]
+       t[i * 2 + 1] = (e[i] - obb.size[i]) / f[i]; // tmax[x, y, z]
+   }
 
-	float tmin = fmaxf(fmaxf(fminf(t[0], t[1]), fminf(t[2], t[3])), fminf(t[4], t[5]));
-	float tmax = fminf(fminf(fmaxf(t[0], t[1]), fmaxf(t[2], t[3])), fmaxf(t[4], t[5]));
-#else 
-	// The above loop simplifies the below if statements
-	// this is done to make sure the sample fits into the book
-	if (CMP(f.x, 0)) {
-		if (-e.x - obb.size.x > 0 || -e.x + obb.size.x < 0) {
-			return -1;
-		}
-		f.x = 0.00001f; // Avoid div by 0!
-	}
-	else if (CMP(f.y, 0)) {
-		if (-e.y - obb.size.y > 0 || -e.y + obb.size.y < 0) {
-			return -1;
-		}
-		f.y = 0.00001f; // Avoid div by 0!
-	}
-	else if (CMP(f.z, 0)) {
-		if (-e.z - obb.size.z > 0 || -e.z + obb.size.z < 0) {
-			return -1;
-		}
-		f.z = 0.00001f; // Avoid div by 0!
-	}
+   math::real tmin = fmaxf(fmaxf(fminf(t[0], t[1]), fminf(t[2], t[3])), fminf(t[4], t[5]));
+   math::real tmax = fminf(fminf(fmaxf(t[0], t[1]), fmaxf(t[2], t[3])), fmaxf(t[4], t[5]));
+#else
+   // The above loop simplifies the below if statements
+   if (CMP(f.x, 0)) {
+       if (-e.x - obb.size.x > 0 || -e.x + obb.size.x < 0) {
+           return false;
+       }
+       f.x = 0.00001f; // Avoid div by 0!
+   }
+   else if (CMP(f.y, 0)) {
+       if (-e.y - obb.size.y > 0 || -e.y + obb.size.y < 0) {
+           return false;
+       }
+       f.y = 0.00001f; // Avoid div by 0!
+   }
+   else if (CMP(f.z, 0)) {
+       if (-e.z - obb.size.z > 0 || -e.z + obb.size.z < 0) {
+           return false;
+       }
+       f.z = 0.00001f; // Avoid div by 0!
+   }
 
-	float t1 = (e.x + obb.size.x) / f.x;
-	float t2 = (e.x - obb.size.x) / f.x;
-	float t3 = (e.y + obb.size.y) / f.y;
-	float t4 = (e.y - obb.size.y) / f.y;
-	float t5 = (e.z + obb.size.z) / f.z;
-	float t6 = (e.z - obb.size.z) / f.z;
+   math::real t1 = (e.x + obb.size.x) / f.x;
+   math::real t2 = (e.x - obb.size.x) / f.x;
+   math::real t3 = (e.y + obb.size.y) / f.y;
+   math::real t4 = (e.y - obb.size.y) / f.y;
+   math::real t5 = (e.z + obb.size.z) / f.z;
+   math::real t6 = (e.z - obb.size.z) / f.z;
 
-	float tmin = fmaxf(fmaxf(fminf(t1, t2), fminf(t3, t4)), fminf(t5, t6));
-	float tmax = fminf(fminf(fmaxf(t1, t2), fmaxf(t3, t4)), fmaxf(t5, t6));
+   math::real tmin = fmaxf(fmaxf(fminf(t1, t2), fminf(t3, t4)), fminf(t5, t6));
+   math::real tmax = fminf(fminf(fmaxf(t1, t2), fmaxf(t3, t4)), fmaxf(t5, t6));
 #endif
 
-	// if tmax < 0, ray is intersecting AABB
-	// but entire AABB is behing it's origin
-	if (tmax < 0) {
-		return false;
-	}
+   // if tmax < 0, ray is intersecting AABB
+   // but entire AABB is behind its origin
+   if (tmax < 0) {
+       return false;
+   }
 
-	// if tmin > tmax, ray doesn't intersect AABB
-	if (tmin > tmax) {
-		return false;
-	}
+   // if tmin > tmax, ray doesn't intersect AABB
+   if (tmin > tmax) {
+       return false;
+   }
 
-	// If tmin is < 0, tmax is closer
-	float t_result = tmin;
+   // If tmin is < 0, tmax is closer
+   math::real t_result = tmin;
+   if (tmin < 0.0f) {
+       t_result = tmax;
+   }
 
-	if (tmin < 0.0f) {
-		t_result = tmax;
-	}
+   if (outResult != nullptr) {
+       outResult->hit = true;
+       outResult->t = t_result;
+       outResult->point = ray.origin + ray.direction * t_result;
 
-	if (outResult != 0) {
-		outResult->hit = true;
-		outResult->t = t_result;
-		outResult->point = ray.origin + ray.direction * t_result;
+       math::vec3 normals[] = {
+           X,            // +x
+           X * -1.0f,    // -x
+           Y,            // +y
+           Y * -1.0f,    // -y
+           Z,            // +z
+           Z * -1.0f     // -z
+       };
 
-		vec3 normals[] = {
-			X,			// +x
-			X * -1.0f,	// -x
-			Y,			// +y
-			Y * -1.0f,	// -y
-			Z,			// +z
-			Z * -1.0f	// -z
-		};
-
-		for (int i = 0; i < 6; ++i) {
-			if (CMP(t_result, t[i])) {
-				outResult->normal = Normalized(normals[i]);
-			}
-		}
-	}
-	return true;
+       for (int i = 0; i < 6; ++i) {
+           if (CMP(t_result, t[i])) {
+               outResult->normal = math::normalized(normals[i]);
+           }
+       }
+   }
+   return true;
 }
 
 void ResetRaycastResult(RaycastResult* outResult) {
 	if (outResult != 0) {
 		outResult->t = -1;
 		outResult->hit = false;
-		outResult->normal = vec3(0, 0, 1);
-		outResult->point = vec3(0, 0, 0);
+		outResult->normal = math::vec3(0, 0, 1);
+		outResult->point = math::vec3(0, 0, 0);
 	}
 }
 
 bool Raycast(const AABB& aabb, const Ray& ray, RaycastResult* outResult) {
 	ResetRaycastResult(outResult);
 
-	vec3 min = GetMin(aabb);
-	vec3 max = GetMax(aabb);
+	math::vec3 min = GetMin(aabb);
+	math::vec3 max = GetMax(aabb);
 
 	// Any component of direction could be 0!
 	// Address this by using a small number, close to
 	// 0 in case any of directions components are 0
-	float t1 = (min.x - ray.origin.x) / (CMP(ray.direction.x, 0.0f) ? 0.00001f : ray.direction.x);
-	float t2 = (max.x - ray.origin.x) / (CMP(ray.direction.x, 0.0f) ? 0.00001f : ray.direction.x);
-	float t3 = (min.y - ray.origin.y) / (CMP(ray.direction.y, 0.0f) ? 0.00001f : ray.direction.y);
-	float t4 = (max.y - ray.origin.y) / (CMP(ray.direction.y, 0.0f) ? 0.00001f : ray.direction.y);
-	float t5 = (min.z - ray.origin.z) / (CMP(ray.direction.z, 0.0f) ? 0.00001f : ray.direction.z);
-	float t6 = (max.z - ray.origin.z) / (CMP(ray.direction.z, 0.0f) ? 0.00001f : ray.direction.z);
+	math::real t1 = (min.x - ray.origin.x) / (CMP(ray.direction.x, 0.0f) ? 0.00001f : ray.direction.x);
+	math::real t2 = (max.x - ray.origin.x) / (CMP(ray.direction.x, 0.0f) ? 0.00001f : ray.direction.x);
+	math::real t3 = (min.y - ray.origin.y) / (CMP(ray.direction.y, 0.0f) ? 0.00001f : ray.direction.y);
+	math::real t4 = (max.y - ray.origin.y) / (CMP(ray.direction.y, 0.0f) ? 0.00001f : ray.direction.y);
+	math::real t5 = (min.z - ray.origin.z) / (CMP(ray.direction.z, 0.0f) ? 0.00001f : ray.direction.z);
+	math::real t6 = (max.z - ray.origin.z) / (CMP(ray.direction.z, 0.0f) ? 0.00001f : ray.direction.z);
 
-	float tmin = fmaxf(fmaxf(fminf(t1, t2), fminf(t3, t4)), fminf(t5, t6));
-	float tmax = fminf(fminf(fmaxf(t1, t2), fmaxf(t3, t4)), fmaxf(t5, t6));
+	math::real tmin = fmaxf(fmaxf(fminf(t1, t2), fminf(t3, t4)), fminf(t5, t6));
+	math::real tmax = fminf(fminf(fmaxf(t1, t2), fmaxf(t3, t4)), fmaxf(t5, t6));
 
 	// if tmax < 0, ray is intersecting AABB
 	// but entire AABB is behing it's origin
@@ -734,7 +724,7 @@ bool Raycast(const AABB& aabb, const Ray& ray, RaycastResult* outResult) {
 		return false;
 	}
 
-	float t_result = tmin;
+	math::real t_result = tmin;
 
 	// If tmin is < 0, tmax is closer
 	if (tmin < 0.0f) {
@@ -746,15 +736,15 @@ bool Raycast(const AABB& aabb, const Ray& ray, RaycastResult* outResult) {
 		outResult->hit = true;
 		outResult->point = ray.origin + ray.direction * t_result;
 
-		vec3 normals[] = {
-			vec3(-1, 0, 0),
-			vec3(1, 0, 0),
-			vec3(0, -1, 0),
-			vec3(0, 1, 0),
-			vec3(0, 0, -1),
-			vec3(0, 0, 1)
+		math::vec3 normals[] = {
+			math::vec3(-1, 0, 0),
+			math::vec3(1, 0, 0),
+			math::vec3(0, -1, 0),
+			math::vec3(0, 1, 0),
+			math::vec3(0, 0, -1),
+			math::vec3(0, 0, 1)
 		};
-		float t[] = { t1, t2, t3, t4, t5, t6 };
+		math::real t[] = { t1, t2, t3, t4, t5, t6 };
 
 		for (int i = 0; i < 6; ++i) {
 			if (CMP(t_result, t[i])) {
@@ -769,8 +759,8 @@ bool Raycast(const AABB& aabb, const Ray& ray, RaycastResult* outResult) {
 bool Raycast(const Plane& plane, const Ray& ray, RaycastResult* outResult) {
 	ResetRaycastResult(outResult);
 
-	float nd = Dot(ray.direction, plane.normal);
-	float pn = Dot(ray.origin, plane.normal);
+	math::real nd = math::dot(ray.direction, plane.normal);
+	math::real pn = math::dot(ray.origin, plane.normal);
 
 	// nd must be negative, and not 0
 	// if nd is positive, the ray and plane normals
@@ -779,7 +769,7 @@ bool Raycast(const Plane& plane, const Ray& ray, RaycastResult* outResult) {
 		return false;
 	}
 
-	float t = (plane.distance - pn) / nd;
+	math::real t = (plane.distance - pn) / nd;
 
 	// t must be positive
 	if (t >= 0.0f) {
@@ -787,7 +777,7 @@ bool Raycast(const Plane& plane, const Ray& ray, RaycastResult* outResult) {
 			outResult->t = t;
 			outResult->hit = true;
 			outResult->point = ray.origin + ray.direction * t;
-			outResult->normal = Normalized(plane.normal);
+			outResult->normal = math::normalized(plane.normal);
 		}
 		return true;
 	}
@@ -797,49 +787,49 @@ bool Raycast(const Plane& plane, const Ray& ray, RaycastResult* outResult) {
 
 bool Linetest(const Sphere& sphere, const Line& line) {
 	Point closest = ClosestPoint(line, sphere.position);
-	float distSq = MagnitudeSq(sphere.position - closest);
+	math::real distSq = math::lengthSq(sphere.position - closest);
 	return distSq <= (sphere.radius * sphere.radius);
 }
 
 bool Linetest(const Plane& plane, const Line& line) {
-	vec3 ab = line.end - line.start;
+	math::vec3 ab = line.end - line.start;
 
-	float nA = Dot(plane.normal, line.start);
-	float nAB = Dot(plane.normal, ab);
+	math::real nA = math::dot(plane.normal, line.start);
+	math::real nAB = math::dot(plane.normal, ab);
 
 	if (CMP(nAB, 0)) {
 		return false;
 	}
 
-	float t = (plane.distance - nA) / nAB;
+	math::real t = (plane.distance - nA) / nAB;
 	return t >= 0.0f && t <= 1.0f;
 }
 
 bool Linetest(const AABB& aabb, const Line& line) {
 	Ray ray;
 	ray.origin = line.start;
-	ray.direction = Normalized(line.end - line.start);
+	ray.direction = math::normalized(line.end - line.start);
 	RaycastResult raycast;
 	if (!Raycast(aabb, ray, &raycast)) {
 		return false;
 	}
-	float t = raycast.t;
+	math::real t = raycast.t;
 
 	return t >= 0 && t * t <= LengthSq(line);
 }
 
 bool Linetest(const OBB& obb, const Line& line) {
-	if (MagnitudeSq(line.end - line.start) < 0.0000001f) {
+	if (math::lengthSq(line.end - line.start) < 0.0000001f) {
 		return PointInOBB(line.start, obb);
 	}
 	Ray ray;
 	ray.origin = line.start;
-	ray.direction = Normalized(line.end - line.start);
+	ray.direction = math::normalized(line.end - line.start);
 	RaycastResult result;
 	if (!Raycast(obb, ray, &result)) {
 		return false;
 	}
-	float t = result.t;
+	math::real t = result.t;
 
 	return t >= 0 && t * t <= LengthSq(line);
 }
@@ -876,12 +866,12 @@ bool Linetest(const Line& line, const Plane& plane) {
 	return Linetest(plane, line);
 }
 
-vec3 Centroid(const Triangle& t) {
+math::vec3 Centroid(const Triangle& t) {
 	Point a = t.GetA();
 	Point b = t.GetB();
 	Point c = t.GetC();
 
-	vec3 result;
+	math::vec3 result;
 	result.x = a.x + b.x + c.x;
 	result.y = a.y + b.y + c.y;
 	result.z = a.z + b.z + c.z;
@@ -892,25 +882,25 @@ vec3 Centroid(const Triangle& t) {
 bool PointInTriangle(const Point& p, const Triangle& t) {
 	// Move the triangle so that the point is  
 	// now at the origin of the triangle
-	vec3 a = t.GetA() - p;
-	vec3 b = t.GetB() - p;
-	vec3 c = t.GetC() - p;
+	math::vec3 a = t.GetA() - p;
+	math::vec3 b = t.GetB() - p;
+	math::vec3 c = t.GetC() - p;
 
 	// The point should be moved too, so they are both
 	// relative, but because we don't use p in the
 	// equation anymore, we don't need it!
 	// p -= p; // This would just equal the zero vector!
 
-	vec3 normPBC = Cross(b, c); // Normal of PBC (u)
-	vec3 normPCA = Cross(c, a); // Normal of PCA (v)
-	vec3 normPAB = Cross(a, b); // Normal of PAB (w)
+	math::vec3 normPBC = math::cross(b, c); // Normal of PBC (u)
+	math::vec3 normPCA = math::cross(c, a); // Normal of PCA (v)
+	math::vec3 normPAB = math::cross(a, b); // Normal of PAB (w)
 
 	// Test to see if the normals are facing 
 	// the same direction, return false if not
-	if (Dot(normPBC, normPCA) < 0.0f) {
+	if (math::dot(normPBC, normPCA) < 0.0f) {
 		return false;
 	}
-	else if (Dot(normPBC, normPAB) < 0.0f) {
+	else if (math::dot(normPBC, normPAB) < 0.0f) {
 		return false;
 	}
 
@@ -918,23 +908,23 @@ bool PointInTriangle(const Point& p, const Triangle& t) {
 	return true;
 }
 
-vec3 BarycentricOptimized(const Point& p, const Triangle& t) {
-	vec3 v0 = t.GetB() - t.GetA();
-	vec3 v1 = t.GetC() - t.GetA();
-	vec3 v2 = p - t.GetA();
+math::vec3 BarycentricOptimized(const Point& p, const Triangle& t) {
+	math::vec3 v0 = t.GetB() - t.GetA();
+	math::vec3 v1 = t.GetC() - t.GetA();
+	math::vec3 v2 = p - t.GetA();
 
-	float d00 = Dot(v0, v0);
-	float d01 = Dot(v0, v1);
-	float d11 = Dot(v1, v1);
-	float d20 = Dot(v2, v0);
-	float d21 = Dot(v2, v1);
-	float denom = d00 * d11 - d01 * d01;
+	math::real d00 = math::dot(v0, v0);
+	math::real d01 = math::dot(v0, v1);
+	math::real d11 = math::dot(v1, v1);
+	math::real d20 = math::dot(v2, v0);
+	math::real d21 = math::dot(v2, v1);
+	math::real denom = d00 * d11 - d01 * d01;
 
 	if (CMP(denom, 0.0f)) {
-		return vec3();
+		return math::vec3();
 	}
 
-	vec3 result;
+	math::vec3 result;
 	result.y = (d11 * d20 - d01 * d21) / denom;
 	result.z = (d00 * d21 - d01 * d20) / denom;
 	result.x = 1.0f - result.y - result.z;
@@ -942,33 +932,33 @@ vec3 BarycentricOptimized(const Point& p, const Triangle& t) {
 	return result;
 }
 
-vec3 Barycentric(const Point& p, const Triangle& t) {
-	vec3 ap = p - t.GetA();
-	vec3 bp = p - t.GetB();
-	vec3 cp = p - t.GetC();
+math::vec3 Barycentric(const Point& p, const Triangle& t) {
+	math::vec3 ap = p - t.GetA();
+	math::vec3 bp = p - t.GetB();
+	math::vec3 cp = p - t.GetC();
 
-	vec3 ab = t.GetB() - t.GetA();
-	vec3 ac = t.GetC() - t.GetA();
-	vec3 bc = t.GetC() - t.GetB();
-	vec3 cb = t.GetB() - t.GetC();
-	vec3 ca = t.GetA() - t.GetC();
+	math::vec3 ab = t.GetB() - t.GetA();
+	math::vec3 ac = t.GetC() - t.GetA();
+	math::vec3 bc = t.GetC() - t.GetB();
+	math::vec3 cb = t.GetB() - t.GetC();
+	math::vec3 ca = t.GetA() - t.GetC();
 
-	vec3 v = ab - Project(ab, cb);
-	float a = 1.0f - (Dot(v, ap) / Dot(v, ab));
+	math::vec3 v = ab - math::project(ab, cb);
+	math::real a = 1.0f - (math::dot(v, ap) / math::dot(v, ab));
 
-	v = bc - Project(bc, ac);
-	float b = 1.0f - (Dot(v, bp) / Dot(v, bc));
+	v = bc - math::project(bc, ac);
+	math::real b = 1.0f - (math::dot(v, bp) / math::dot(v, bc));
 
-	v = ca - Project(ca, ab);
-	float c = 1.0f - (Dot(v, cp) / Dot(v, ca));
+	v = ca - math::project(ca, ab);
+	math::real c = 1.0f - (math::dot(v, cp) / math::dot(v, ca));
 
-	return vec3(a, b, c);
+	return math::vec3(a, b, c);
 }
 
 Plane FromTriangle(const Triangle& t) {
 	Plane result;
-	result.normal = Normalized(Cross(t.GetB() - t.GetA(), t.GetC() - t.GetA()));
-	result.distance = Dot(result.normal, t.GetA());
+	result.normal = math::normalized(math::cross(t.GetB() - t.GetA(), t.GetC() - t.GetA()));
+	result.distance = math::dot(result.normal, t.GetA());
 	return result;
 }
 
@@ -985,9 +975,9 @@ Point ClosestPoint(const Triangle& t, const Point& p) {
 	Point c2 = ClosestPoint(Line(t.GetB(), t.GetC()), closest); // Line BC
 	Point c3 = ClosestPoint(Line(t.GetC(), t.GetA()), closest); // Line CA
 
-	float magSq1 = MagnitudeSq(closest - c1);
-	float magSq2 = MagnitudeSq(closest - c2);
-	float magSq3 = MagnitudeSq(closest - c3);
+	math::real magSq1 = math::lengthSq(closest - c1);
+	math::real magSq2 = math::lengthSq(closest - c2);
+	math::real magSq3 = math::lengthSq(closest - c3);
 
 	if (magSq1 < magSq2 && magSq1 < magSq3) {
 		return c1;
@@ -1001,38 +991,38 @@ Point ClosestPoint(const Triangle& t, const Point& p) {
 
 bool TriangleSphere(const Triangle& t, const Sphere& s) {
 	Point closest = ClosestPoint(t, s.position);
-	float magSq = MagnitudeSq(closest - s.position);
+	math::real magSq = math::lengthSq(closest - s.position);
 	return magSq <= s.radius * s.radius;
 }
 
 bool TriangleAABB(const Triangle& t, const AABB& a) {
 	// Compute the edge vectors of the triangle  (ABC)
-	vec3 f0 = t.GetC() - t.GetA();
-	vec3 f1 = t.GetC() - t.GetB();
-	vec3 f2 = t.GetA() - t.GetC();
+	math::vec3 f0 = t.GetC() - t.GetA();
+	math::vec3 f1 = t.GetC() - t.GetB();
+	math::vec3 f2 = t.GetA() - t.GetC();
 
 	// Compute the face normals of the AABB
-	vec3 u0(1.0f, 0.0f, 0.0f);
-	vec3 u1(0.0f, 1.0f, 0.0f);
-	vec3 u2(0.0f, 0.0f, 1.0f);
+	math::vec3 u0(1.0f, 0.0f, 0.0f);
+	math::vec3 u1(0.0f, 1.0f, 0.0f);
+	math::vec3 u2(0.0f, 0.0f, 1.0f);
 
-	vec3 test[13] = {
+	math::vec3 test[13] = {
 		// 3 Normals of AABB
 		u0, // AABB Axis 1
 		u1, // AABB Axis 2
 		u2, // AABB Axis 3
 		// 1 Normal of the Triangle
-		Cross(f0, f1),
-		// 9 Axis, cross products of all edges
-		Cross(u0, f0),
-		Cross(u0, f1),
-		Cross(u0, f2),
-		Cross(u1, f0),
-		Cross(u1, f1),
-		Cross(u1, f2),
-		Cross(u2, f0),
-		Cross(u2, f1),
-		Cross(u2, f2)
+		math::cross(f0, f1),
+		// 9 Axis, math::cross products of all edges
+		math::cross(u0, f0),
+		math::cross(u0, f1),
+		math::cross(u0, f2),
+		math::cross(u1, f0),
+		math::cross(u1, f1),
+		math::cross(u1, f2),
+		math::cross(u2, f0),
+		math::cross(u2, f1),
+		math::cross(u2, f2)
 	};
 
 	for (int i = 0; i < 13; ++i) {
@@ -1045,54 +1035,52 @@ bool TriangleAABB(const Triangle& t, const AABB& a) {
 }
 
 bool TriangleOBB(const Triangle& t, const OBB& o) {
-	// Compute the edge vectors of the triangle  (ABC)
-	vec3 f0 = t.GetB() - t.GetA();
-	vec3 f1 = t.GetC() - t.GetB();
-	vec3 f2 = t.GetA() - t.GetC();
+	// Compute the edge vectors of the triangle (ABC)
+	math::vec3 f0 = t.GetB() - t.GetA();
+	math::vec3 f1 = t.GetC() - t.GetB();
+	math::vec3 f2 = t.GetA() - t.GetC();
 
 	// Compute the face normals of the AABB
-	const float* orientation = o.orientation.asArray;
-	vec3 u0(orientation[0], orientation[1], orientation[2]);
-	vec3 u1(orientation[3], orientation[4], orientation[5]);
-	vec3 u2(orientation[6], orientation[7], orientation[8]);
+	const math::vec3 u0 = o.orientation[0];  // GLM gère bien le const
+	const math::vec3 u1 = o.orientation[1];
+	const math::vec3 u2 = o.orientation[2];
 
-	vec3 test[13] = {
+	math::vec3 test[13] = {
 		// 3 Normals of AABB
 		u0, // AABB Axis 1
 		u1, // AABB Axis 2
 		u2, // AABB Axis 3
 		// 1 Normal of the Triangle
-		Cross(f0, f1),
+		math::cross(f0, f1),
 		// 9 Axis, cross products of all edges
-		Cross(u0, f0),
-		Cross(u0, f1),
-		Cross(u0, f2),
-		Cross(u1, f0),
-		Cross(u1, f1),
-		Cross(u1, f2),
-		Cross(u2, f0),
-		Cross(u2, f1),
-		Cross(u2, f2)
-	};
+		math::cross(u0, f0),
+		math::cross(u0, f1),
+		math::cross(u0, f2),
+		math::cross(u1, f0),
+		math::cross(u1, f1),
+		math::cross(u1, f2),
+		math::cross(u2, f0),
+		math::cross(u2, f1),
+		math::cross(u2, f2)
+};
 
 	for (int i = 0; i < 13; ++i) {
 		if (!OverlapOnAxis(o, t, test[i])) {
-			return false; // Seperating axis found
+			return false; // Separating axis found
 		}
 	}
 
-	return true; // Seperating axis not found
+	return true; // Separating axis not found
 }
-
 bool TriangleTriangle(const Triangle& t1, const Triangle& t2) {
 #if 0
-	vec3 axisToTest[] = {
+	math::vec3 axisToTest[] = {
 		// Triangle 1, Normal
 		SatCrossEdge(t1.a, t1.b, t1.b, t1.c),
 		// Triangle 2, Normal
 		SatCrossEdge(t2.a, t2.b, t2.b, t2.c),
 
-		// Cross Product of edges
+		// math::cross Product of edges
 		SatCrossEdge(t2.a, t2.b, t1.a, t1.b),
 		SatCrossEdge(t2.a, t2.b, t1.b, t1.c),
 		SatCrossEdge(t2.a, t2.b, t1.c, t1.a),
@@ -1106,32 +1094,32 @@ bool TriangleTriangle(const Triangle& t1, const Triangle& t2) {
 		SatCrossEdge(t2.c, t2.a, t1.c, t1.a),
 	};
 #else 
-	vec3 t1_f0 = t1.GetB() - t1.GetA(); // Edge 0
-	vec3 t1_f1 = t1.GetC() - t1.GetB(); // Edge 1
-	vec3 t1_f2 = t1.GetA() - t1.GetC(); // Edge 2
+	math::vec3 t1_f0 = t1.GetB() - t1.GetA(); // Edge 0
+	math::vec3 t1_f1 = t1.GetC() - t1.GetB(); // Edge 1
+	math::vec3 t1_f2 = t1.GetA() - t1.GetC(); // Edge 2
 
-	vec3 t2_f0 = t2.GetB() - t2.GetA(); // Edge 0
-	vec3 t2_f1 = t2.GetC() - t2.GetB(); // Edge 1
-	vec3 t2_f2 = t2.GetA() - t2.GetC(); // Edge 2
+	math::vec3 t2_f0 = t2.GetB() - t2.GetA(); // Edge 0
+	math::vec3 t2_f1 = t2.GetC() - t2.GetB(); // Edge 1
+	math::vec3 t2_f2 = t2.GetA() - t2.GetC(); // Edge 2
 
-	vec3 axisToTest[] = {
+	math::vec3 axisToTest[] = {
 		// Triangle 1, Normal
-		Cross(t1_f0, t1_f1),
+		math::cross(t1_f0, t1_f1),
 		// Triangle 2, Normal
-		Cross(t2_f0, t2_f1),
+		math::cross(t2_f0, t2_f1),
 
-		// Cross Product of edges
-		Cross(t2_f0, t1_f0),
-		Cross(t2_f0, t1_f1),
-		Cross(t2_f0, t1_f2),
+		// math::cross Product of edges
+		math::cross(t2_f0, t1_f0),
+		math::cross(t2_f0, t1_f1),
+		math::cross(t2_f0, t1_f2),
 
-		Cross(t2_f1, t1_f0),
-		Cross(t2_f1, t1_f1),
-		Cross(t2_f1, t1_f2),
+		math::cross(t2_f1, t1_f0),
+		math::cross(t2_f1, t1_f1),
+		math::cross(t2_f1, t1_f2),
 
-		Cross(t2_f2, t1_f0),
-		Cross(t2_f2, t1_f1),
-		Cross(t2_f2, t1_f2),
+		math::cross(t2_f2, t1_f0),
+		math::cross(t2_f2, t1_f1),
+		math::cross(t2_f2, t1_f2),
 	};
 #endif
 
@@ -1145,13 +1133,13 @@ bool TriangleTriangle(const Triangle& t1, const Triangle& t2) {
 }
 
 bool TriangleTriangleRobust(const Triangle& t1, const Triangle& t2) {
-	vec3 axisToTest[] = {
+	math::vec3 axisToTest[] = {
 		// Triangle 1, Normal
 		SatCrossEdge(t1.GetA(), t1.GetB(), t1.GetB(), t1.GetC()),
 		// Triangle 2, Normal
 		SatCrossEdge(t2.GetA(), t2.GetB(), t2.GetB(), t2.GetC()),
 
-		// Cross Product of edges
+		// math::cross Product of edges
 		SatCrossEdge(t2.GetA(), t2.GetB(), t1.GetA(), t1.GetB()),
 		SatCrossEdge(t2.GetA(), t2.GetB(), t1.GetB(), t1.GetC()),
 		SatCrossEdge(t2.GetA(), t2.GetB(), t1.GetC(), t1.GetA()),
@@ -1167,7 +1155,7 @@ bool TriangleTriangleRobust(const Triangle& t1, const Triangle& t2) {
 
 	for (int i = 0; i < 11; ++i) {
 		if (!OverlapOnAxis(t1, t2, axisToTest[i])) {
-			if (!CMP(MagnitudeSq(axisToTest[i]), 0)) {
+			if (!CMP(math::lengthSq(axisToTest[i]), 0)) {
 				return false; // Seperating axis found
 			}
 		}
@@ -1176,26 +1164,26 @@ bool TriangleTriangleRobust(const Triangle& t1, const Triangle& t2) {
 	return true; // Seperating axis not found
 }
 
-vec3 SatCrossEdge(const vec3& a, const vec3& b, const vec3& c, const vec3& d) {
-	vec3 ab = b - a;
-	vec3 cd = d - c;
+math::vec3 SatCrossEdge(const math::vec3& a, const math::vec3& b, const math::vec3& c, const math::vec3& d) {
+	math::vec3 ab = b - a;
+	math::vec3 cd = d - c;
 
-	vec3 result = Cross(ab, cd);
-	if (!CMP(MagnitudeSq(result), 0)) { // Is ab and cd parallel?
+	math::vec3 result = math::cross(ab, cd);
+	if (!CMP(math::lengthSq(result), 0)) { // Is ab and cd parallel?
 		return result; // Not parallel!
 	}
 	else { // ab and cd are parallel
 		// Get an axis perpendicular to AB
-		vec3 axis = Cross(ab, c - a);
-		result = Cross(ab, axis);
-		if (!CMP(MagnitudeSq(result), 0)) { // Still parallel?
+		math::vec3 axis = math::cross(ab, c - a);
+		result = math::cross(ab, axis);
+		if (!CMP(math::lengthSq(result), 0)) { // Still parallel?
 			return result; // Not parallel
 		}
 	}
 	// New axis being tested is parallel too.
 	// This means that a, b, c and d are on a line
 	// Nothing we can do!
-	return vec3();
+	return math::vec3();
 }
 
 Point debugRaycastResult;
@@ -1208,11 +1196,11 @@ bool Raycast(const Triangle& triangle, const Ray& ray, RaycastResult* outResult)
 	if (!Raycast(plane, ray, &planeResult)) {
 		return false;
 	}
-	float t = planeResult.t;
+	math::real t = planeResult.t;
 
 	Point result = ray.origin + ray.direction * t;
 	
-	vec3 barycentric = Barycentric(result, triangle);
+	math::vec3 barycentric = Barycentric(result, triangle);
 	if (barycentric.x >= 0.0f && barycentric.x <= 1.0f &&
 		barycentric.y >= 0.0f && barycentric.y <= 1.0f &&
 		barycentric.z >= 0.0f && barycentric.z <= 1.0f) {
@@ -1233,12 +1221,12 @@ bool Raycast(const Triangle& triangle, const Ray& ray, RaycastResult* outResult)
 bool Linetest(const Triangle& triangle, const Line& line) {
 	Ray ray;
 	ray.origin = line.start;
-	ray.direction = Normalized(line.end - line.start);
+	ray.direction = math::normalized(line.end - line.start);
 	RaycastResult raycast;
 	if (!Raycast(triangle, ray, &raycast)) {
 		return false;
 	}
-	float t = raycast.t;
+	math::real t = raycast.t;
 
 	return t >= 0 && t * t <= LengthSq(line);
 }
@@ -1248,8 +1236,8 @@ void AccelerateMesh(Mesh& mesh) {
 		return;
 	}
 
-	vec3 min = mesh.vertices[0];
-	vec3 max = mesh.vertices[0];
+	math::vec3 min = mesh.vertices[0];
+	math::vec3 max = mesh.vertices[0];
 
 	for (int i = 1; i < mesh.numTriangles * 3; ++i) {
 		min.x = fminf(mesh.vertices[i].x, min.x);
@@ -1283,17 +1271,17 @@ void SplitBVHNode(BVHNode* node, const Mesh& model, int depth) {
 		if (node->numTriangles > 0) {
 			node->children = new BVHNode[8];
 
-			vec3 c = node->bounds.position;
-			vec3 e = node->bounds.size *0.5f;
+			math::vec3 c = node->bounds.position;
+			math::vec3 e = node->bounds.size *0.5f;
 
-			node->children[0].bounds = AABB(c + vec3(-e.x, +e.y, -e.z), e);
-			node->children[1].bounds = AABB(c + vec3(+e.x, +e.y, -e.z), e);
-			node->children[2].bounds = AABB(c + vec3(-e.x, +e.y, +e.z), e);
-			node->children[3].bounds = AABB(c + vec3(+e.x, +e.y, +e.z), e);
-			node->children[4].bounds = AABB(c + vec3(-e.x, -e.y, -e.z), e);
-			node->children[5].bounds = AABB(c + vec3(+e.x, -e.y, -e.z), e);
-			node->children[6].bounds = AABB(c + vec3(-e.x, -e.y, +e.z), e);
-			node->children[7].bounds = AABB(c + vec3(+e.x, -e.y, +e.z), e);
+			node->children[0].bounds = AABB(c + math::vec3(-e.x, +e.y, -e.z), e);
+			node->children[1].bounds = AABB(c + math::vec3(+e.x, +e.y, -e.z), e);
+			node->children[2].bounds = AABB(c + math::vec3(-e.x, +e.y, +e.z), e);
+			node->children[3].bounds = AABB(c + math::vec3(+e.x, +e.y, +e.z), e);
+			node->children[4].bounds = AABB(c + math::vec3(-e.x, -e.y, -e.z), e);
+			node->children[5].bounds = AABB(c + math::vec3(+e.x, -e.y, -e.z), e);
+			node->children[6].bounds = AABB(c + math::vec3(-e.x, -e.y, +e.z), e);
+			node->children[7].bounds = AABB(c + math::vec3(+e.x, -e.y, +e.z), e);
 
 		}
 	}
@@ -1589,20 +1577,20 @@ bool MeshTriangle(const Mesh& mesh, const Triangle& triangle) {
 	return false;
 }
 
-float Raycast(const Mesh& mesh, const Ray& ray) {
+math::real Raycast(const Mesh& mesh, const Ray& ray) {
 	return MeshRay(mesh, ray);
 }
 
-float Raycast(const Model& mesh, const Ray& ray) {
+math::real Raycast(const Model& mesh, const Ray& ray) {
 	return ModelRay(mesh, ray);
 }
 
-float MeshRay(const Mesh& mesh, const Ray& ray) {
+math::real MeshRay(const Mesh& mesh, const Ray& ray) {
 	if (mesh.accelerator == 0) {
 		for (int i = 0; i < mesh.numTriangles; ++i) {
 			RaycastResult raycast;
 			Raycast(mesh.triangles[i], ray, &raycast);
-			float result = raycast.t;
+			math::real result = raycast.t;
 			if (result >= 0) {
 				return result;
 			}
@@ -1623,7 +1611,7 @@ float MeshRay(const Mesh& mesh, const Ray& ray) {
 					// Triangle indices in BVHNode index the mesh
 					RaycastResult raycast;
 					Raycast(mesh.triangles[iterator->triangles[i]], ray, &raycast);
-					float r = raycast.t;
+					math::real r = raycast.t;
 					if (r >= 0) {
 						return r;
 					}
@@ -1646,9 +1634,9 @@ float MeshRay(const Mesh& mesh, const Ray& ray) {
 }
 
 bool TrianglePlane(const Triangle& t, const Plane& p) {
-	float side1 = PlaneEquation(t.GetC(), p);
-	float side2 = PlaneEquation(t.GetB(), p);
-	float side3 = PlaneEquation(t.GetC(), p);
+	math::real side1 = PlaneEquation(t.GetC(), p);
+	math::real side2 = PlaneEquation(t.GetB(), p);
+	math::real side3 = PlaneEquation(t.GetC(), p);
 
 	// On Plane
 	if (CMP(side1, 0) && CMP(side2, 0) && CMP(side3, 0)) {
@@ -1671,8 +1659,8 @@ bool TrianglePlane(const Triangle& t, const Plane& p) {
 void Model::SetContent(Mesh* mesh) {
 	content = mesh;
 	if (content != 0) {
-		vec3 min = mesh->vertices[0];
-		vec3 max = mesh->vertices[0];
+		math::vec3 min = mesh->vertices[0];
+		math::vec3 max = mesh->vertices[0];
 
 		for (int i = 1; i < mesh->numTriangles * 3; ++i) {
 			min.x = fminf(mesh->vertices[i].x, min.x);
@@ -1687,12 +1675,12 @@ void Model::SetContent(Mesh* mesh) {
 	}
 }
 
-mat4 GetWorldMatrix(const Model& model) {
-	mat4 translation = Translation(model.position);
-	mat4 rotation = Rotation(model.rotation.x, model.rotation.y, model.rotation.z);
-	mat4 localMat = /* Scale * */ rotation * translation;
+math::mat4 GetWorldMatrix(const Model& model) {
+	math::mat4 translation = math::translation(model.position);
+	math::mat4 rotation = math::rotation(model.rotation.x, model.rotation.y, model.rotation.z);
+	math::mat4 localMat = /* Scale * */ rotation * translation;
 	
-	mat4 parentMat;
+	math::mat4 parentMat;
 	if (model.parent != 0) {
 		parentMat = GetWorldMatrix(*model.parent);
 	}
@@ -1701,23 +1689,23 @@ mat4 GetWorldMatrix(const Model& model) {
 }
 
 OBB GetOBB(const Model& model) {
-	mat4 world = GetWorldMatrix(model);
+	math::mat4 world = GetWorldMatrix(model);
 	AABB aabb = model.GetBounds();
 	OBB obb;
 
 	obb.size = aabb.size;
-	obb.position = MultiplyPoint(aabb.position, world);
-	obb.orientation = Cut(world, 3, 3);
+	obb.position = math::multiplyPoint(aabb.position, world);
+	obb.orientation = math::cut(world, 3, 3);
 
 	return obb;
 }
 
-float ModelRay(const Model& model, const Ray& ray) {
-	mat4 world = GetWorldMatrix(model);
-	mat4 inv = Inverse(world);
+math::real ModelRay(const Model& model, const Ray& ray) {
+	math::mat4 world = GetWorldMatrix(model);
+	math::mat4 inv = math::inverse(world);
 	Ray local;
-	local.origin = MultiplyPoint(ray.origin, inv);
-	local.direction = MultiplyVector(ray.direction, inv);
+	local.origin =math::multiplyPoint(ray.origin, inv);
+	local.direction = math::multiplyVector(ray.direction, inv);
 	local.NormalizeDirection();
 	if (model.GetMesh() != 0) {
 		return MeshRay(*(model.GetMesh()), local);
@@ -1726,11 +1714,11 @@ float ModelRay(const Model& model, const Ray& ray) {
 }
 
 bool Linetest(const Model& model, const Line& line) {
-	mat4 world = GetWorldMatrix(model);
-	mat4 inv = Inverse(world);
+	math::mat4 world = GetWorldMatrix(model);
+	math::mat4 inv = math::inverse(world);
 	Line local;
-	local.start = MultiplyPoint(line.start, inv);
-	local.end = MultiplyPoint(line.end, inv);
+	local.start = math::multiplyPoint(line.start, inv);
+	local.end = math::multiplyPoint(line.end, inv);
 	if (model.GetMesh() != 0) {
 		return Linetest(*(model.GetMesh()), local);
 	}
@@ -1738,10 +1726,10 @@ bool Linetest(const Model& model, const Line& line) {
 }
 
 bool ModelSphere(const Model& model, const Sphere& sphere) {
-	mat4 world = GetWorldMatrix(model);
-	mat4 inv = Inverse(world);
+	math::mat4 world = GetWorldMatrix(model);
+	math::mat4 inv = math::inverse(world);
 	Sphere local;
-	local.position = MultiplyPoint(sphere.position, inv);
+	local.position = math::multiplyPoint(sphere.position, inv);
 	if (model.GetMesh() != 0) {
 		return MeshSphere(*(model.GetMesh()), local);
 	}
@@ -1749,12 +1737,12 @@ bool ModelSphere(const Model& model, const Sphere& sphere) {
 }
 
 bool ModelAABB(const Model& model, const AABB& aabb) {
-	mat4 world = GetWorldMatrix(model);
-	mat4 inv = Inverse(world);
+	math::mat4 world = GetWorldMatrix(model);
+	math::mat4 inv = math::inverse(world);
 	OBB local;
 	local.size = aabb.size;
-	local.position = MultiplyPoint(aabb.position, inv);
-	local.orientation = Cut(inv, 3, 3);
+	local.position = math::multiplyPoint(aabb.position, inv);
+	local.orientation = math::cut(inv, 3, 3);
 	if (model.GetMesh() != 0) {
 		return MeshOBB(*(model.GetMesh()), local);
 	}
@@ -1762,12 +1750,12 @@ bool ModelAABB(const Model& model, const AABB& aabb) {
 }
 
 bool ModelOBB(const Model& model, const OBB& obb) {
-	mat4 world = GetWorldMatrix(model);
-	mat4 inv = Inverse(world);
+	math::mat4 world = GetWorldMatrix(model);
+	math::mat4 inv = math::inverse(world);
 	OBB local;
 	local.size = obb.size;
-	local.position = MultiplyPoint(obb.position, inv);
-	local.orientation = obb.orientation * Cut(inv, 3, 3);
+	local.position = math::multiplyPoint(obb.position, inv);
+	local.orientation = obb.orientation * math::cut(inv, 3, 3);
 	if (model.GetMesh() != 0) {
 		return MeshOBB(*(model.GetMesh()), local);
 	}
@@ -1775,10 +1763,10 @@ bool ModelOBB(const Model& model, const OBB& obb) {
 }
 
 bool ModelPlane(const Model& model, const Plane& plane) {
-	mat4 world = GetWorldMatrix(model);
-	mat4 inv = Inverse(world);
+	math::mat4 world = GetWorldMatrix(model);
+	math::mat4 inv = math::inverse(world);
 	Plane local;
-	local.normal = MultiplyVector(plane.normal, inv);
+	local.normal = math::multiplyVector(plane.normal, inv);
 	local.distance = plane.distance;
 	if (model.GetMesh() != 0) {
 		return MeshPlane(*(model.GetMesh()), local);
@@ -1787,12 +1775,12 @@ bool ModelPlane(const Model& model, const Plane& plane) {
 }
 
 bool ModelTriangle(const Model& model, const Triangle& triangle) {
-	mat4 world = GetWorldMatrix(model);
-	mat4 inv = Inverse(world);
+	math::mat4 world = GetWorldMatrix(model);
+	math::mat4 inv = math::inverse(world);
 	Triangle local;
-	local.GetA() = MultiplyPoint(triangle.GetA(), inv);
-	local.GetB() = MultiplyPoint(triangle.GetB(), inv);
-	local.GetC() = MultiplyPoint(triangle.GetC(), inv);
+	local.GetA() = math::multiplyPoint(triangle.GetA(), inv);
+	local.GetB() = math::multiplyPoint(triangle.GetB(), inv);
+	local.GetC() = math::multiplyPoint(triangle.GetC(), inv);
 	if (model.GetMesh() != 0) {
 		return MeshTriangle(*(model.GetMesh()), local);
 	}
@@ -1800,58 +1788,60 @@ bool ModelTriangle(const Model& model, const Triangle& triangle) {
 }
 
 Point Intersection(Plane p1, Plane p2, Plane p3) {
-	/*return ((Cross(p2.normal, p3.normal) * -p1.distance) +
-		(Cross(p3.normal, p1.normal) * -p2.distance) +
-		(Cross(p1.normal, p2.normal) * -p3.distance)) /
-		(Dot(p1.normal, Cross(p2.normal, p3.normal)));*/
+	/*return ((math::cross(p2.normal, p3.normal) * -p1.distance) +
+		(math::cross(p3.normal, p1.normal) * -p2.distance) +
+		(math::cross(p1.normal, p2.normal) * -p3.distance)) /
+		(math::dot(p1.normal, math::cross(p2.normal, p3.normal)));*/
 		
 #if 1
-	mat3 D(
+	math::mat3 D(
 		p1.normal.x, p2.normal.x, p3.normal.x,
 		p1.normal.y, p2.normal.y, p3.normal.y,
 		p1.normal.z, p2.normal.z, p3.normal.z
 	);
-	vec3 A(-p1.distance, -p2.distance, -p3.distance);
+	math::vec3 A(-p1.distance, -p2.distance, -p3.distance);
 
-	mat3 Dx = D, Dy = D, Dz = D;
-	Dx._11 = A.x; Dx._12 = A.y; Dx._13 = A.z;
-	Dy._21 = A.x; Dy._22 = A.y; Dy._23 = A.z;
-	Dz._31 = A.x; Dz._32 = A.y; Dz._33 = A.z;
+	math::mat3 Dx = D, Dy = D, Dz = D;
+	Dx[0][0] = A.x; Dx[0][1] = A.y; Dx[0][2] = A.z;
+	// Remplacer la deuxième ligne de Dy
+	Dy[1][0] = A.x; Dy[1][1] = A.y; Dy[1][2] = A.z;
+	// Remplacer la troisième ligne de Dz
+	Dz[2][0] = A.x; Dz[2][1] = A.y; Dz[2][2] = A.z;
 
-	float detD = Determinant(D);
+	math::real detD = math::determinant(D);
 
-	if (CMP(detD, 0)) {
+	if (math::equal(detD, 0)) {
 		return Point();
 	}
 
-	float detDx = Determinant(Dx);
-	float detDy = Determinant(Dy);
-	float detDz = Determinant(Dz);
+	math::real detDx = math::determinant(Dx);
+	math::real detDy = math::determinant(Dy);
+	math::real detDz = math::determinant(Dz);
 
 	return Point(detDx / detD, detDy / detD, detDz / detD);
 #else 
-	vec3 m1(p1.normal.x, p2.normal.x, p3.normal.x);
-	vec3 m2(p1.normal.y, p2.normal.y, p3.normal.y);
-	vec3 m3(p1.normal.z, p2.normal.z, p3.normal.z);
-	vec3 d(-p1.distance, -p2.distance, -p3.distance);
+	math::vec3 m1(p1.normal.x, p2.normal.x, p3.normal.x);
+	math::vec3 m2(p1.normal.y, p2.normal.y, p3.normal.y);
+	math::vec3 m3(p1.normal.z, p2.normal.z, p3.normal.z);
+	math::vec3 d(-p1.distance, -p2.distance, -p3.distance);
 	
-	vec3 u = Cross(m2, m3);
-	vec3 v = Cross(m1, d);
-	float denom = Dot(m1, u);
+	math::vec3 u = math::cross(m2, m3);
+	math::vec3 v = math::cross(m1, d);
+	math::real denom = math::dot(m1, u);
 
-	if (CMP(denom, 0.0f)) {
+	if (math::equal(denom, 0.0f)) {
 		return Point();
 	}
 
 	Point result;
-	result.x = Dot(d, u) / denom;
-	result.y = Dot(m3, v) / denom;
-	result.z = -Dot(m2, v) / denom;
+	result.x = math::dot(d, u) / denom;
+	result.y = math::dot(m3, v) / denom;
+	result.z = -math::dot(m2, v) / denom;
 	return result;
 #endif
 }
 
-void GetCorners(const Frustum& f, vec3* outCorners) {
+void GetCorners(const Frustum& f, math::vec3* outCorners) {
 	outCorners[0] = Intersection(f.Near(), f.Top(),    f.Left());
 	outCorners[1] = Intersection(f.Near(), f.Top(),    f.Right());
 	outCorners[2] = Intersection(f.Near(), f.Bottom(), f.Left());
@@ -1864,9 +1854,9 @@ void GetCorners(const Frustum& f, vec3* outCorners) {
 
 bool Intersects(const Frustum& f, const Point& p) {
 	for (int i = 0; i < 6; ++i) {
-		vec3 normal = f.planes[i].normal;
-		float dist = f.planes[i].distance;
-		float side = Dot(p, normal) + dist;
+		math::vec3 normal = f.planes[i].normal;
+		math::real dist = f.planes[i].distance;
+		math::real side = math::dot(p, normal) + dist;
 		if (side < 0.0f) {
 			return false;
 		}
@@ -1877,9 +1867,9 @@ bool Intersects(const Frustum& f, const Point& p) {
 
 bool Intersects(const Frustum& f, const Sphere& s) {
 	for (int i = 0; i < 6; ++i) {
-		vec3 normal = f.planes[i].normal;
-		float dist = f.planes[i].distance;
-		float side = Dot(s.position, normal) + dist;
+		math::vec3 normal = f.planes[i].normal;
+		math::real dist = f.planes[i].distance;
+		math::real side = math::dot(s.position, normal) + dist;
 		if (side < -s.radius) {
 			return false;
 		}
@@ -1888,15 +1878,15 @@ bool Intersects(const Frustum& f, const Sphere& s) {
 	return true;
 }
 
-float Classify(const AABB& aabb, const Plane& plane) {
+math::real Classify(const AABB& aabb, const Plane& plane) {
 	// maximum extent in direction of plane normal 
-	float r = fabsf(aabb.size.x * plane.normal.x)
+	math::real r = fabsf(aabb.size.x * plane.normal.x)
 		+ fabsf(aabb.size.y * plane.normal.y)
 		+ fabsf(aabb.size.z * plane.normal.z);
 
 	// signed distance between box center and plane
-	//float d = plane.Test(mCenter);
-	float d = Dot(plane.normal, aabb.position) + plane.distance;
+	//math::real d = plane.Test(mCenter);
+	math::real d = math::dot(plane.normal, aabb.position) + plane.distance;
 
 	// return signed distance
 	if (fabsf(d) < r) {
@@ -1908,17 +1898,17 @@ float Classify(const AABB& aabb, const Plane& plane) {
 	return d - r;
 }
 
-float Classify(const OBB& obb, const Plane& plane) {
-	vec3 normal = MultiplyVector(plane.normal, obb.orientation);
+math::real Classify(const OBB& obb, const Plane& plane) {
+	math::vec3 normal = math::multiplyVector(plane.normal, obb.orientation);
 
 	// maximum extent in direction of plane normal 
-	float r = fabsf(obb.size.x * normal.x)
+	math::real r = fabsf(obb.size.x * normal.x)
 		+ fabsf(obb.size.y * normal.y)
 		+ fabsf(obb.size.z * normal.z);
 
 	// signed distance between box center and plane
-	//float d = plane.Test(mCenter);
-	float d = Dot(plane.normal, obb.position) + plane.distance;
+	//math::real d = plane.Test(mCenter);
+	math::real d = math::dot(plane.normal, obb.position) + plane.distance;
 
 	// return signed distance
 	if (fabsf(d) < r) {
@@ -1932,7 +1922,7 @@ float Classify(const OBB& obb, const Plane& plane) {
 
 bool Intersects(const Frustum& f, const OBB& obb) {
 	for (int i = 0; i < 6; ++i) {
-		float side = Classify(obb, f.planes[i]);
+		math::real side = Classify(obb, f.planes[i]);
 		if (side < 0) {
 			return false;
 		}
@@ -1942,7 +1932,7 @@ bool Intersects(const Frustum& f, const OBB& obb) {
 
 bool Intersects(const Frustum& f, const AABB& aabb) {
 	for (int i = 0; i < 6; ++i) {
-		float side = Classify(aabb, f.planes[i]);
+		math::real side = Classify(aabb, f.planes[i]);
 		if (side < 0) {
 			return false;
 		}
@@ -1950,9 +1940,9 @@ bool Intersects(const Frustum& f, const AABB& aabb) {
 	return true;
 }
 
-vec3 Unproject(const vec3& viewportPoint, const vec2& viewportOrigin, const vec2& viewportSize, const mat4& view, const mat4& projection) {
-	// Step 1, Normalize the input vector to the view port
-	float normalized[4] = {
+math::vec3 Unproject(const math::vec3& viewportPoint, const math::vec2& viewportOrigin, const math::vec2& viewportSize, const math::mat4& view, const math::mat4& projection) {
+	// Step 1, math::normalize the input vector to the view port
+	math::real normalized[4] = {
 		(viewportPoint.x - viewportOrigin.x) / viewportSize.x,
 		(viewportPoint.y - viewportOrigin.y) / viewportSize.y,
 		viewportPoint.z,
@@ -1960,7 +1950,7 @@ vec3 Unproject(const vec3& viewportPoint, const vec2& viewportOrigin, const vec2
 	};
 
 	// Step 2, Translate into NDC space
-	float ndcSpace[4] = {
+	math::real ndcSpace[4] = {
 		normalized[0], normalized[1],
 		normalized[2], normalized[3]
 	};
@@ -1977,37 +1967,37 @@ vec3 Unproject(const vec3& viewportPoint, const vec2& viewportOrigin, const vec2
 	}
 
 	// Step 3, NDC to Eye Space
-	mat4 invProjection = Inverse(projection);
-	float eyeSpace[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	// eyeSpace = MultiplyPoint(ndcSpace, invProjection);
-	Multiply(eyeSpace, ndcSpace, 1, 4, invProjection.asArray, 4, 4);
+	math::mat4 invProjection = math::inverse(projection);
+	math::real eyeSpace[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	// eyeSpace = MultiplyPoint(ndcSpace, invmath::projection);
+	math::multiply(eyeSpace, ndcSpace, 1, 4, glm::value_ptr(invProjection), 4, 4);
 
 	// Step 4, Eye Space to World Space
-	mat4 invView = Inverse(view);
-	float worldSpace[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	math::mat4 invView = math::inverse(view);
+	math::real worldSpace[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	// worldSpace = MultiplyPoint(eyeSpace, invView);
-	Multiply(worldSpace, eyeSpace, 1, 4, invView.asArray, 4, 4);
+	math::multiply(worldSpace, eyeSpace, 1, 4, glm::value_ptr(invView), 4, 4);
 
 	// Step 5, Undo perspective divide!
-	if (!CMP(worldSpace[3], 0.0f)) {
+	if (!math::equal(worldSpace[3], 0.0f)) {
 		worldSpace[0] /= worldSpace[3];
 		worldSpace[1] /= worldSpace[3];
 		worldSpace[2] /= worldSpace[3];
 	}
 
 	// Return the resulting world space point
-	return vec3(worldSpace[0], worldSpace[1], worldSpace[2]);
+	return math::vec3(worldSpace[0], worldSpace[1], worldSpace[2]);
 }
 
-Ray GetPickRay(const vec2& viewportPoint, const vec2& viewportOrigin, const vec2& viewportSize, const mat4& view, const mat4& projection) {
-	vec3 nearPoint(viewportPoint.x, viewportPoint.y, 0.0f);
-	vec3 farPoint(viewportPoint.x, viewportPoint.y, 1.0f);
+Ray GetPickRay(const math::vec2& viewportPoint, const math::vec2& viewportOrigin, const math::vec2& viewportSize, const math::mat4& view, const math::mat4& projection) {
+	math::vec3 nearPoint(viewportPoint.x, viewportPoint.y, 0.0f);
+	math::vec3 farPoint(viewportPoint.x, viewportPoint.y, 1.0f);
 
-	vec3 pNear = Unproject(nearPoint, viewportOrigin, viewportSize, view, projection);
-	vec3 pFar = Unproject(farPoint, viewportOrigin, viewportSize, view, projection);
+	math::vec3 pNear = Unproject(nearPoint, viewportOrigin, viewportSize, view, projection);
+	math::vec3 pFar = Unproject(farPoint, viewportOrigin, viewportSize, view, projection);
 
-	vec3 normal = Normalized(pFar - pNear);
-	vec3 origin = pNear;
+	math::vec3 normal = math::normalized(pFar - pNear);
+	math::vec3 origin = pNear;
 
 	return Ray(origin, normal);
 }
@@ -2017,7 +2007,7 @@ Ray GetPickRay(const vec2& viewportPoint, const vec2& viewportOrigin, const vec2
 void ResetCollisionManifold(CollisionManifold* result) {
 	if (result != 0) {
 		result->colliding = false;
-		result->normal = vec3(0, 0, 1);
+		result->normal = math::vec3(0, 0, 1);
 		result->depth = FLT_MAX;
 		if (result->contacts.size() > 0) {
 			result->contacts.clear();
@@ -2026,18 +2016,17 @@ void ResetCollisionManifold(CollisionManifold* result) {
 }
 
 std::vector<Point> GetVertices(const OBB& obb) {
-	std::vector<vec3> v;
-	v.resize(8);
+	std::vector<math::vec3> v(8);  // Directement avec la taille
 
-	vec3 C = obb.position;	// OBB Center
-	vec3 E = obb.size;		// OBB Extents
-	const float* o = obb.orientation.asArray;
-	vec3 A[] = {			// OBB Axis
-		vec3(o[0], o[1], o[2]),
-		vec3(o[3], o[4], o[5]),
-		vec3(o[6], o[7], o[8]),
-	};
+	math::vec3 C = obb.position;  // OBB Center
+	math::vec3 E = obb.size;      // OBB Extents
+	const math::vec3 A[] = {      // OBB Axis
+		obb.orientation[0],
+		obb.orientation[1],
+		obb.orientation[2]
+};
 
+	// Même formule mais plus claire
 	v[0] = C + A[0] * E[0] + A[1] * E[1] + A[2] * E[2];
 	v[1] = C - A[0] * E[0] + A[1] * E[1] + A[2] * E[2];
 	v[2] = C + A[0] * E[0] - A[1] * E[1] + A[2] * E[2];
@@ -2070,40 +2059,39 @@ std::vector<Line> GetEdges(const OBB& obb) {
 }
 
 std::vector<Plane> GetPlanes(const OBB& obb) {
-	vec3 c = obb.position;	// OBB Center
-	vec3 e = obb.size;		// OBB Extents
-	const float* o = obb.orientation.asArray;
-	vec3 a[] = {			// OBB Axis
-		vec3(o[0], o[1], o[2]),
-		vec3(o[3], o[4], o[5]),
-		vec3(o[6], o[7], o[8]),
+	math::vec3 c = obb.position;	// OBB Center
+	math::vec3 e = obb.size;		// OBB Extents
+	math::vec3 a[] = {			// OBB Axis
+		obb.orientation[0],
+		obb.orientation[1],
+		obb.orientation[2]
 	};
 
 	std::vector<Plane> result;
 	result.resize(6);
 
-	result[0] = Plane(a[0]        ,  Dot(a[0], (c + a[0] * e.x)));
-	result[1] = Plane(a[0] * -1.0f, -Dot(a[0], (c - a[0] * e.x)));
-	result[2] = Plane(a[1]        ,  Dot(a[1], (c + a[1] * e.y)));
-	result[3] = Plane(a[1] * -1.0f, -Dot(a[1], (c - a[1] * e.y)));
-	result[4] = Plane(a[2]        ,  Dot(a[2], (c + a[2] * e.z)));
-	result[5] = Plane(a[2] * -1.0f, -Dot(a[2], (c - a[2] * e.z)));
+	result[0] = Plane(a[0]        ,  math::dot(a[0], (c + a[0] * e.x)));
+	result[1] = Plane(a[0] * -1.0f, -math::dot(a[0], (c - a[0] * e.x)));
+	result[2] = Plane(a[1]        ,  math::dot(a[1], (c + a[1] * e.y)));
+	result[3] = Plane(a[1] * -1.0f, -math::dot(a[1], (c - a[1] * e.y)));
+	result[4] = Plane(a[2]        ,  math::dot(a[2], (c + a[2] * e.z)));
+	result[5] = Plane(a[2] * -1.0f, -math::dot(a[2], (c - a[2] * e.z)));
 
 	return result;
 }
 
 
 bool ClipToPlane(const Plane& plane, const Line& line, Point* outPoint) {
-	vec3 ab = line.end - line.start;
+	math::vec3 ab = line.end - line.start;
 
-	float nA = Dot(plane.normal, line.start);
-	float nAB = Dot(plane.normal, ab);
+	math::real nA = math::dot(plane.normal, line.start);
+	math::real nAB = math::dot(plane.normal, ab);
 
 	if (CMP(nAB, 0)) {
 		return false;
 	}
 
-	float t = (plane.distance - nA) / nAB;
+	math::real t = (plane.distance - nA) / nAB;
 	if (t >= 0.0f && t <= 1.0f) {
 		if (outPoint != 0) {
 			*outPoint = line.start + ab * t;
@@ -2134,19 +2122,19 @@ std::vector<Point> ClipEdgesToOBB(const std::vector<Line>& edges, const OBB& obb
 	return result;
 }
 
-float PenetrationDepth(const OBB& o1, const OBB& o2, const vec3& axis, bool* outShouldFlip) {
-	Interval i1 = GetInterval(o1, Normalized(axis));
-	Interval i2 = GetInterval(o2, Normalized(axis));
+math::real PenetrationDepth(const OBB& o1, const OBB& o2, const math::vec3& axis, bool* outShouldFlip) {
+	Interval i1 = GetInterval(o1, math::normalized(axis));
+	Interval i2 = GetInterval(o2, math::normalized(axis));
 
 	if (!((i2.min <= i1.max) && (i1.min <= i2.max))) {
 		return 0.0f; // No penerattion
 	}
 
-	float len1 = i1.max - i1.min;
-	float len2 = i2.max - i2.min;
-	float min = fminf(i1.min, i2.min);
-	float max = fmaxf(i1.max, i2.max);
-	float length = max - min;
+	math::real len1 = i1.max - i1.min;
+	math::real len2 = i2.max - i2.min;
+	math::real min = fminf(i1.min, i2.min);
+	math::real max = fmaxf(i1.max, i2.max);
+	math::real length = max - min;
 
 	if (outShouldFlip != 0) {
 		*outShouldFlip = (i2.min < i1.min);
@@ -2159,43 +2147,45 @@ CollisionManifold FindCollisionFeatures(const OBB& A, const OBB& B) {
 	CollisionManifold result; // Will return result of intersection!
 	ResetCollisionManifold(&result);
 
-	Sphere s1(A.position, Magnitude(A.size));
-	Sphere s2(B.position, Magnitude(B.size));
+	Sphere s1(A.position, math::length(A.size));
+	Sphere s2(B.position, math::length(B.size));
 
 	if (!SphereSphere(s1, s2)) {
 		return result;
 	}
 
-	const float* o1 = A.orientation.asArray;
-	const float* o2 = B.orientation.asArray;
+	// const math::real* o1 = A.orientation.asArray;
+	// const math::real* o2 = B.orientation.asArray;
 
-	vec3 test[15] = {
-		vec3(o1[0], o1[1], o1[2]),
-		vec3(o1[3], o1[4], o1[5]),
-		vec3(o1[6], o1[7], o1[8]),
-		vec3(o2[0], o2[1], o2[2]),
-		vec3(o2[3], o2[4], o2[5]),
-		vec3(o2[6], o2[7], o2[8])
-	};
+	math::vec3 test[15] = {
+		// Premiers 3 axes de A
+		A.orientation[0],
+		A.orientation[1],
+		A.orientation[2],
+		// Premiers 3 axes de B
+		B.orientation[0],
+		B.orientation[1],
+		B.orientation[2]
+};
 
 	for (int i = 0; i < 3; ++i) { // Fill out rest of axis
-		test[6 + i * 3 + 0] = Cross(test[i], test[0]);
-		test[6 + i * 3 + 1] = Cross(test[i], test[1]);
-		test[6 + i * 3 + 2] = Cross(test[i], test[2]);
+		test[6 + i * 3 + 0] = math::cross(test[i], test[0]);
+		test[6 + i * 3 + 1] = math::cross(test[i], test[1]);
+		test[6 + i * 3 + 2] = math::cross(test[i], test[2]);
 	}
 
-	vec3* hitNormal = 0;
+	math::vec3* hitNormal = 0;
 	bool shouldFlip;
 
 	for (int i = 0; i < 15; ++i) {
 		if (test[i].x < 0.000001f) test[i].x = 0.0f;
 		if (test[i].y < 0.000001f) test[i].y = 0.0f;
 		if (test[i].z < 0.000001f) test[i].z = 0.0f;
-		if (MagnitudeSq(test[i])< 0.001f) {
+		if (math::lengthSq(test[i])< 0.001f) {
 			continue;
 		}
 
-		float depth = PenetrationDepth(A, B, test[i], &shouldFlip);
+		math::real depth = PenetrationDepth(A, B, test[i], &shouldFlip);
 		if (depth <= 0.0f) {
 			return result;
 		}
@@ -2211,7 +2201,7 @@ CollisionManifold FindCollisionFeatures(const OBB& A, const OBB& B) {
 	if (hitNormal == 0) {
 		return result;
 	}
-	vec3 axis = Normalized(*hitNormal);
+	math::vec3 axis = math::normalized(*hitNormal);
 
 	std::vector<Point> c1 = ClipEdgesToOBB(GetEdges(B), A);
 	std::vector<Point> c2 = ClipEdgesToOBB(GetEdges(A), B);
@@ -2220,16 +2210,16 @@ CollisionManifold FindCollisionFeatures(const OBB& A, const OBB& B) {
 	result.contacts.insert(result.contacts.end(), c2.begin(), c2.end());
 
 	Interval i = GetInterval(A, axis);
-	float distance = (i.max - i.min)* 0.5f - result.depth * 0.5f;
-	vec3 pointOnPlane = A.position + axis * distance;
+	math::real distance = (i.max - i.min)* 0.5f - result.depth * 0.5f;
+	math::vec3 pointOnPlane = A.position + axis * distance;
 	
 	for (int i = result.contacts.size() - 1; i >= 0; --i) {
-		vec3 contact = result.contacts[i];
-		result.contacts[i] = contact + (axis * Dot(axis, pointOnPlane - contact));
+		math::vec3 contact = result.contacts[i];
+		result.contacts[i] = contact + (axis * math::dot(axis, pointOnPlane - contact));
 		
 		// This bit is in the "There is more" section of the book
 		for (int j = result.contacts.size() - 1; j > i; --j) {
-			if (MagnitudeSq(result.contacts[j] - result.contacts[i]) < 0.0001f) {
+			if (math::lengthSq(result.contacts[j] - result.contacts[i]) < 0.0001f) {
 				result.contacts.erase(result.contacts.begin() + j);
 				break;
 			}
@@ -2246,20 +2236,20 @@ CollisionManifold FindCollisionFeatures(const Sphere& A, const Sphere& B) {
 	CollisionManifold result; // Will return result of intersection!
 	ResetCollisionManifold(&result);
 
-	float r = A.radius + B.radius;
-	vec3 d = B.position - A.position;
+	math::real r = A.radius + B.radius;
+	math::vec3 d = B.position - A.position;
 
-	if (MagnitudeSq(d) - r * r > 0 || MagnitudeSq(d) == 0.0f) {
+	if (math::lengthSq(d) - r * r > 0 || math::lengthSq(d) == 0.0f) {
 		return result;
 	}
-	Normalize(d);
+	math::normalized(d);
 
 	result.colliding = true;
 	result.normal = d;
-	result.depth = fabsf(Magnitude(d) - r) * 0.5f;
+	result.depth = fabsf(math::length(d) - r) * 0.5f;
 	
 	// dtp - Distance to intersection point
-	float dtp = A.radius - result.depth;
+	math::real dtp = A.radius - result.depth;
 	Point contact = A.position + d * dtp;
 	
 	result.contacts.push_back(contact);
@@ -2273,27 +2263,27 @@ CollisionManifold FindCollisionFeatures(const OBB& A, const Sphere& B) {
 
 	Point closestPoint = ClosestPoint(A, B.position);
 
-	float distanceSq = MagnitudeSq(closestPoint - B.position);
+	math::real distanceSq = math::lengthSq(closestPoint - B.position);
 	if (distanceSq > B.radius * B.radius) {
 		return result;
 	}
 
-	vec3 normal; 
+	math::vec3 normal;
 	if (CMP(distanceSq, 0.0f)) {
-		if (CMP(MagnitudeSq(closestPoint - A.position), 0.0f)) {
+		if (CMP(math::lengthSq(closestPoint - A.position), 0.0f)) {
 			return result;
 
 		}
 		// Closest point is at the center of the sphere
-		normal = Normalized(closestPoint - A.position);
+		normal = math::normalized(closestPoint - A.position);
 	}
 	else {
-		normal = Normalized(B.position - closestPoint);
+		normal = math::normalized(B.position - closestPoint);
 	}
 
 	Point outsidePoint = B.position - normal * B.radius;
 
-	float distance = Magnitude(closestPoint - outsidePoint);
+	math::real distance = math::length(closestPoint - outsidePoint);
 
 	result.colliding = true;
 	result.contacts.push_back(closestPoint + (outsidePoint - closestPoint) * 0.5f);

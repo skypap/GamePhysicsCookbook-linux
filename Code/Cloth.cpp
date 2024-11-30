@@ -2,7 +2,7 @@
 #include <GL/glew.h>
 #include "FixedFunctionPrimitives.h"
 
-void Cloth::Initialize(int gridSize, float distance, const vec3& position) {
+void Cloth::Initialize(int gridSize, float distance, const math::vec3& position) {
 	float k = -1.0f;
 	float b = 0.0f;
 	clothSize = gridSize;
@@ -28,7 +28,7 @@ void Cloth::Initialize(int gridSize, float distance, const vec3& position) {
 			float z_pos = ((float)z + position.z - halfSize) * distance;
 
 
-			verts[i].SetPosition(vec3(x_pos, position.y, z_pos));
+			verts[i].SetPosition(math::vec3(x_pos, position.y, z_pos));
 			verts[i].SetMass(1.0f);
 			verts[i].SetBounce(0.0f);
 			verts[i].SetFriction(0.9f);
@@ -41,7 +41,7 @@ void Cloth::Initialize(int gridSize, float distance, const vec3& position) {
 			int i = z * gridSize + x;
 			int j = (z + 1) * gridSize + x;
 
-			float rest = Magnitude(verts[i].GetPosition() - verts[j].GetPosition());
+			float rest = math::length(verts[i].GetPosition() - verts[j].GetPosition());
 			Spring spring(k, b, rest);
 			spring.SetParticles(&verts[i], &verts[j]);
 			structural.push_back(spring);
@@ -54,7 +54,7 @@ void Cloth::Initialize(int gridSize, float distance, const vec3& position) {
 			int i = z * gridSize + x;
 			int j = z * gridSize + (x + 1);
 
-			float rest = Magnitude(verts[i].GetPosition() - verts[j].GetPosition());
+			float rest = math::length(verts[i].GetPosition() - verts[j].GetPosition());
 			Spring spring(k, b, rest);
 			spring.SetParticles(&verts[i], &verts[j]);
 			structural.push_back(spring);
@@ -67,7 +67,7 @@ void Cloth::Initialize(int gridSize, float distance, const vec3& position) {
 			int i = z * gridSize + x;
 			int j = (z + 1) * gridSize + (x + 1);
 
-			float rest = Magnitude(verts[i].GetPosition() - verts[j].GetPosition());
+			float rest = math::length(verts[i].GetPosition() - verts[j].GetPosition());
 			Spring spring(k, b, rest);
 			spring.SetParticles(&verts[i], &verts[j]);
 			shear.push_back(spring);
@@ -80,7 +80,7 @@ void Cloth::Initialize(int gridSize, float distance, const vec3& position) {
 			int i = z * gridSize + x;
 			int j = (z + 1) * gridSize + (x - 1);
 
-			float rest = Magnitude(verts[i].GetPosition() - verts[j].GetPosition());
+			float rest = math::length(verts[i].GetPosition() - verts[j].GetPosition());
 			Spring spring(k, b, rest);
 			spring.SetParticles(&verts[i], &verts[j]);
 			shear.push_back(spring);
@@ -93,7 +93,7 @@ void Cloth::Initialize(int gridSize, float distance, const vec3& position) {
 			int i = z * gridSize + x;
 			int j = (z + 2) * gridSize + x;
 
-			float rest = Magnitude(verts[i].GetPosition() - verts[j].GetPosition());
+			float rest = math::length(verts[i].GetPosition() - verts[j].GetPosition());
 			Spring spring(k, b, rest);
 			spring.SetParticles(&verts[i], &verts[j]);
 			bend.push_back(spring);
@@ -106,7 +106,7 @@ void Cloth::Initialize(int gridSize, float distance, const vec3& position) {
 			int i = z * gridSize + x;
 			int j = z * gridSize + (x + 2);
 
-			float rest = Magnitude(verts[i].GetPosition() - verts[j].GetPosition());
+			float rest = math::length(verts[i].GetPosition() - verts[j].GetPosition());
 			Spring spring(k, b, rest);
 			spring.SetParticles(&verts[i], &verts[j]);
 			bend.push_back(spring);
@@ -213,8 +213,8 @@ void Cloth::Render(bool debug) {
 				continue;
 			}
 
-			vec3 p1 = bend[i].GetP1()->GetPosition();
-			vec3 p2 = bend[i].GetP2()->GetPosition();
+			math::vec3 p1 = bend[i].GetP1()->GetPosition();
+			math::vec3 p2 = bend[i].GetP2()->GetPosition();
 
 			// Visualization
 			/*p1.y += 0.1f;

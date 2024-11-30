@@ -20,9 +20,9 @@ void CH15Demo::Initialize(int width, int height) {
 	float val[] = { 0.5f, 1.0f, -1.5f, 0.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, val);
 
-	camera.SetTarget(vec3(3.75622f, 2.98255f, 0.0f));
+	camera.SetTarget(math::vec3(3.75622f, 2.98255f, 0.0f));
 	camera.SetZoom(12.0f);
-	camera.SetRotation(vec2(-67.9312f, 19.8f));
+	camera.SetRotation(math::vec2(-67.9312f, 19.8f));
 
 	ResetDemo();
 }
@@ -35,18 +35,18 @@ void CH15Demo::ResetDemo() {
 	bodies.resize(2);
 
 	bodies[0].type = RIGIDBODY_TYPE_BOX;
-	bodies[0].position = vec3(0.5f, 6, 0);
+	bodies[0].position = math::vec3(0.5f, 6, 0);
 #ifndef LINEAR_ONLY
-	bodies[0].orientation = vec3(0.0f, 0.0f, 0.4f);
+	bodies[0].orientation =math::vec3(0.0f, 0.0f, 0.4f);
 #endif
 
 	bodies[1].type = RIGIDBODY_TYPE_BOX;
-	bodies[1].position = vec3(0, 1, 0);
+	bodies[1].position = math::vec3(0, 1, 0);
 	bodies[1].mass = 5.0f;
 
 	groundBox = RigidbodyVolume(RIGIDBODY_TYPE_BOX);
-	groundBox.position = vec3(0, -0.5f, 0) * vec3(1, 0.5f, 1);
-	groundBox.box.size = vec3(50, 1, 50) * 0.25f;
+	groundBox.position = math::vec3(0, -0.5f, 0) * math::vec3(1, 0.5f, 1);
+	groundBox.box.size = math::vec3(50, 1, 50) * 0.25f;
 	groundBox.mass = 0.0f;
 	groundBox.SynchCollisionVolumes();
 

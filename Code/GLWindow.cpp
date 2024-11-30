@@ -22,7 +22,7 @@ GLWindow::GLWindow(const char* title, int width, int height)
 	: IWindow(title, width, height) {
 	mouseButtonState = 0;
 	memset(keyboardState, false, sizeof(bool) * 256);
-	m_vecMousePos = vec2(0.0f, 0.0f);
+	m_vecMousePos = math::vec2(0.0f, 0.0f);
 }
 
 void GLWindow::SetClearColor(float r, float g, float b) {
@@ -71,7 +71,7 @@ void GLWindow::OnKeyUp(int keyCode) {
 	keyboardState[KeyIndex(keyCode)] = false;
 }
 
-vec2 GLWindow::GetMousePosition() {
+math::vec2 GLWindow::GetMousePosition() {
 	return m_vecMousePos;
 }
 

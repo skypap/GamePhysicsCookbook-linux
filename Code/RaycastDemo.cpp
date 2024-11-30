@@ -19,18 +19,18 @@ void RaycastDemo::Initialize(int width, int height) {
 
 	ResetRaycastResult(&raycastResult);
 
-	sphere.position = vec3(-4, 2, 0);
-	aabb.position = vec3(4, 2, 0);
-	obb.position = vec3(-4, -2, 0);
-	obb.orientation = Rotation3x3(30.0f, 20.0f, 0.0f);
+	sphere.position = math::vec3(-4, 2, 0);
+	aabb.position = math::vec3(4, 2, 0);
+	obb.position = math::vec3(-4, -2, 0);
+	obb.orientation = math::rotation3x3(30.0f, 20.0f, 0.0f);
 	plane = FromTriangle(Triangle(
 		Point(4, -1, 0),
 		Point(3, -3, 0),
 		Point(3, -3, 1)
 	));
-	triangle.GetA() = vec3(0, 3, 0);
-	triangle.GetB() = vec3(-1, 1, 0);
-	triangle.GetC() = vec3(1, 1, 0);
+	triangle.GetA() = math::vec3(0, 3, 0);
+	triangle.GetB() = math::vec3(-1, 1, 0);
+	triangle.GetC() = math::vec3(1, 1, 0);
 
 	glPointSize(5.0f);
 	glEnable(GL_LIGHTING);
@@ -61,7 +61,7 @@ void RaycastDemo::Render() {
 
 	glDisable(GL_LIGHTING);
 	if (mouseLeftDown) {
-		screenRay = GetPickRay(mousePos, vec2(), size, camera.GetViewMatrix(), camera.GetProjectionMatrix());
+		screenRay = GetPickRay(mousePos, math::vec2(), size, camera.GetViewMatrix(), camera.GetProjectionMatrix());
 		screenRay.NormalizeDirection();
 
 		Raycast(sphere, screenRay, 0);

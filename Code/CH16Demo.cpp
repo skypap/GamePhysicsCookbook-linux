@@ -15,15 +15,15 @@ void CH16Demo::Initialize(int width, int height) {
 
 	size_imgui_window = true;
 
-	camera.SetTarget(vec3(3.75622f, 2.98255f, 0.0f));
+	camera.SetTarget(math::vec3(3.75622f, 2.98255f, 0.0f));
 	camera.SetZoom(9.0f);
-	camera.SetRotation(vec2(-67.9312f, 19.8f));
+	camera.SetRotation(math::vec2(-67.9312f, 19.8f));
 
 	num_part = 15;
 	part_dist = 0.2f;
 	k = -3.0f;
 	d = 0.0f;
-	ground.size = vec3(10.0f, 0.1f, 10.0f);
+	ground.size = math::vec3(10.0f, 0.1f, 10.0f);
 
 	ResetDemo();
 }
@@ -48,7 +48,7 @@ void CH16Demo::ResetDemo() {
 	physicsSystem.ClearCloths();
 	renderObjects.clear();
 
-	cloth.Initialize(num_part, part_dist, vec3(0, 6, 0));
+	cloth.Initialize(num_part, part_dist,math:: vec3(0, 6, 0));
 	cloth.SetStructuralSprings(k, d);
 	cloth.SetBendSprings(k, d);
 	cloth.SetShearSprings(k, d);
@@ -58,15 +58,15 @@ void CH16Demo::ResetDemo() {
 	renderObjects.resize(4);
 
 	float d = 0.5f;
-	renderObjects[0].position = vec3( d, 2.4f,  d);
-	renderObjects[1].position = vec3(-d, 2.3f,  d);
-	renderObjects[2].position = vec3(-d, 2.4f, -d);
-	renderObjects[3].position = vec3( d, 2.3f, -d);
+	renderObjects[0].position =math:: vec3( d, 2.4f,  d);
+	renderObjects[1].position =math:: vec3(-d, 2.3f,  d);
+	renderObjects[2].position =math:: vec3(-d, 2.4f, -d);
+	renderObjects[3].position =math:: vec3( d, 2.3f, -d);
 
 	for (int i = 0; i < 4; ++i) {
-		renderObjects[i].size = vec3(0.3f, 0.5f, 0.3f);
+		renderObjects[i].size = math::vec3(0.3f, 0.5f, 0.3f);
 		physicsSystem.AddConstraint(renderObjects[i]);
-		renderObjects[i].size = vec3(0.1f, 0.5f, 0.1f);
+		renderObjects[i].size = math::vec3(0.1f, 0.5f, 0.1f);
 	}
 }
 

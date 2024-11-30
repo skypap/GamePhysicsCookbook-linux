@@ -103,17 +103,17 @@ void SplitTree(OctreeNode* node, int depth) {
 	if (node->children == 0) {
 		node->children = new OctreeNode[8];
 
-		vec3 c = node->bounds.position;
-		vec3 e = node->bounds.size *0.5f;
+		math::vec3 c = node->bounds.position;
+		math::vec3 e = node->bounds.size *0.5f;
 
-		node->children[0].bounds = AABB(c + vec3(-e.x, +e.y, -e.z), e);
-		node->children[1].bounds = AABB(c + vec3(+e.x, +e.y, -e.z), e);
-		node->children[2].bounds = AABB(c + vec3(-e.x, +e.y, +e.z), e);
-		node->children[3].bounds = AABB(c + vec3(+e.x, +e.y, +e.z), e);
-		node->children[4].bounds = AABB(c + vec3(-e.x, -e.y, -e.z), e);
-		node->children[5].bounds = AABB(c + vec3(+e.x, -e.y, -e.z), e);
-		node->children[6].bounds = AABB(c + vec3(-e.x, -e.y, +e.z), e);
-		node->children[7].bounds = AABB(c + vec3(+e.x, -e.y, +e.z), e);
+		node->children[0].bounds = AABB(c + math::vec3(-e.x, +e.y, -e.z), e);
+		node->children[1].bounds = AABB(c + math::vec3(+e.x, +e.y, -e.z), e);
+		node->children[2].bounds = AABB(c + math::vec3(-e.x, +e.y, +e.z), e);
+		node->children[3].bounds = AABB(c + math::vec3(+e.x, +e.y, +e.z), e);
+		node->children[4].bounds = AABB(c + math::vec3(-e.x, -e.y, -e.z), e);
+		node->children[5].bounds = AABB(c + math::vec3(+e.x, -e.y, -e.z), e);
+		node->children[6].bounds = AABB(c + math::vec3(-e.x, -e.y, +e.z), e);
+		node->children[7].bounds = AABB(c + math::vec3(+e.x, -e.y, +e.z), e);
 	}
 
 	if (node->children != 0 && node->models.size() > 0) {
@@ -265,13 +265,13 @@ std::vector<Model*> Query(OctreeNode* node, const AABB& aabb) {
 	return result;
 }
 
-bool Scene::Accelerate(const vec3& position, float size) {
+bool Scene::Accelerate(const math::vec3& position, float size) {
 	if (octree != 0) {
 		return false;
 	}
 
-	vec3 min(position.x - size, position.y - size, position.z - size);
-	vec3 max(position.x + size, position.y + size, position.z + size);
+	math::vec3 min(position.x - size, position.y - size, position.z - size);
+	math::vec3 max(position.x + size, position.y + size, position.z + size);
 
 	// Construct tree root
 	octree = new OctreeNode();

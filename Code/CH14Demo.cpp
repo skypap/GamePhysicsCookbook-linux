@@ -18,9 +18,9 @@ void CH14Demo::Initialize(int width, int height) {
 	size_imgui_window = true;
 	lastFrameTime = GetMilliseconds();
 
-	camera.SetTarget(vec3(3.75622f, 2.98255f, 0.0f));
+	camera.SetTarget(math::vec3(3.75622f, 2.98255f, 0.0f));
 	camera.SetZoom(9.0f);
-	camera.SetRotation(vec2(-67.9312f, 19.8f));
+	camera.SetRotation(math::vec2(-67.9312f, 19.8f));
 
 	ResetDemo();
 }
@@ -34,32 +34,35 @@ void CH14Demo::ResetDemo() {
 
 
 	OBB ground;
-	ground.size = vec3(10.0f, 0.15f, 10.0f);
+	ground.size = math::vec3(10.0f, 0.15f, 10.0f);
 
 	OBB obb1;
-	obb1.position = vec3(0.0f, 1.86f, -1.92f);
-	obb1.orientation = Rotation3x3(30.716f, 0.0f, 0.0f);
-	obb1.size = vec3(2.0f, 0.15f, 2.0f);
-
+	obb1.position = math::vec3(0.0f, 1.86f, -1.92f);
+	obb1.orientation = math::rotation3x3(30.716f, 0.0f, 0.0f);
+	obb1.size = math::vec3(2.0f, 0.15f, 2.0f);
+	std::cout << "OBB1 Position: (" << obb1.position.x<<","<< obb1.position.y<<","<< obb1.position.z<<")" << std::endl;
+	// std::cout << "OBB1 Orientation Matrix:  (" << obb1.orientation<<","<< obb1.position.y<<","<< obb1.position.z<<")" << std::endl;
+	// std::cout << "OBB1 Orientation Matrix: " << obb1.orientation << std::endl;
 	OBB obb2;
-	obb2.position = vec3(-1.0f, 3.6f, 1.2f);
-	obb2.orientation = Rotation3x3(-33.964f, -24.233f, 9.128f);
-	obb2.size = vec3(2.0f, 0.15f, 2.0f);
+	obb2.position =math::vec3(-1.0f, 3.6f, 1.2f);
+	obb2.orientation = math::rotation3x3(-33.964f, -24.233f, 9.128f);
+	obb2.orientation = math::rotation3x3(-33.964f, -24.233f, 9.128f);
+	obb2.size = math::vec3(2.0f, 0.15f, 2.0f);
 
 	OBB obb3;
-	obb3.position = vec3(0.0f, 3.93f, -2.27f);
-	obb3.orientation = Rotation3x3(24.702f, 0.0f, 0.0f);
-	obb3.size = vec3(2.0f, 0.15f, 0.7817011f);
+	obb3.position = math::vec3(0.0f, 3.93f, -2.27f);
+	obb3.orientation = math::rotation3x3(24.702f, 0.0f, 0.0f);
+	obb3.size = math::vec3(2.0f, 0.15f, 0.7817011f);
 
 	physicsSystem.AddConstraint(ground);
 	physicsSystem.AddConstraint(obb1);
 	physicsSystem.AddConstraint(obb2);
 	physicsSystem.AddConstraint(obb3);
 
-	vec3 spawnPos = vec3(-0.5f, 6.5f, -1.01f);
-	vec3 spawnSize = vec3(3.8505f, 2, 4.034834f);
-	vec3 spawnMin = spawnPos - spawnSize;
-	vec3 spawnMax = spawnPos + spawnSize;
+	math::vec3 spawnPos = math::vec3(-0.5f, 6.5f, -1.01f);
+	math::vec3 spawnSize = math::vec3(3.8505f, 2, 4.034834f);
+	math::vec3 spawnMin = spawnPos - spawnSize;
+	math::vec3 spawnMax = spawnPos + spawnSize;
 
 	for (int i = 0; i < numParticles; ++i) {
 		particles.push_back(Particle());
@@ -142,7 +145,7 @@ void CH14Demo::Update(float dt) {
 	// in case the simulation becomes unstable and something 
 	// falls below the floor of the world!
 	for (int i = 0; i < particles.size(); ++i) {
-		vec3 position = particles[i].GetPosition();
+		math::vec3 position = particles[i].GetPosition();
 		if (position.y < -5.0f) {
 			position.y = -5.0f;
 			particles[i].SetPosition(position);
@@ -163,8 +166,8 @@ float CH14Demo::Random(float min, float max) {
 	return (random*range) + min;
 }
 
-vec3 CH14Demo::Random(vec3 min, vec3 max) {
-	vec3 result;
+math::vec3 CH14Demo::Random(math::vec3 min, math::vec3 max) {
+	math::vec3 result;
 	result.x = Random(min.x, max.x);
 	result.y = Random(min.y, max.y);
 	result.z = Random(min.z, max.z);

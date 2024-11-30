@@ -1,10 +1,10 @@
 #include "Geometry2D.h"
-#include "matrices.h"
+#include "math_config.h"
 #include <cmath>
 #include <cfloat>
 #include <iostream>
 #include "Compare.h"
-
+using  vec2=math::vec2;
 #define CLAMP(number, minimum, maximum) \
 	number = (number < minimum) ? minimum : \
 		((number > maximum) ? maximum : number)
@@ -13,11 +13,11 @@
 	((minB <= maxA) && (minA <= maxB))
 
 float Length(const Line2D& line) {
-	return Magnitude(line.end - line.start);
+	return math::length(line.end - line.start);
 }
 
 float LengthSq(const Line2D& line) {
-	return MagnitudeSq(line.end - line.start);
+	return glm::length(line.end - line.start)*glm::length(line.end - line.start);
 }
 
 vec2 GetMin(const Rectangle2D& rect) {
@@ -73,12 +73,13 @@ bool PointInOrientedRectangle(const Point2D& point, const OrientedRectangle& rec
 	// Second, we rotate that vector by the inverse of the rectangles
 	// rotation (On the Z axis in 3D). We can either invert a matrix,
 	// or construct a matrix from the negative rotation angle
-	float theta = -DEG2RAD(rectangle.rotation);
+	float theta = -math::radians(rectangle.rotation);
 	float zRotation2x2[] = { // Construct matrix
 		cosf(theta), sinf(theta),
 		-sinf(theta), cosf(theta) };
 	// Rotate vector
-	Multiply(rotVector.asArray, vec2(rotVector.x, rotVector.y).asArray, 1, 2, zRotation2x2, 2, 2);
+
+	math::multiply(glm::value_ptr(rotVector), glm::value_ptr(rotVector), 1, 2, zRotation2x2, 2, 2);
 
 	// Now, the rotVector is in the local space of the world oriented rectangle.
 	// But remember, it's a vector, not a point. Assume the rectangle is at 0,0
@@ -138,7 +139,7 @@ bool LineCircle(const Line2D& line, const Circle& circle) {
 
 	// Project point (circle position) onto ab (line segment), computing the 
 	// paramaterized position d(t) = a + t * (b - a)
-	float t = Dot(circle.position - line.start, ab) / Dot(ab, ab);
+	float t = math::dot(circle.position - line.start, ab) / math::dot(ab, ab);
 
 	// Clamp T to a 0-1 range. If t was < 0 or > 1
 	// then the closest point was outside the segment!
@@ -161,7 +162,7 @@ bool LineRectangle(const Line2D& line, const Rectangle2D& rect) {
 		return true;
 	}
 	
-	vec2 norm = Normalized(line.end - line.start);
+	vec2 norm = math::normalized(line.end - line.start);
 	norm.x = (norm.x != 0) ? 1.0f / norm.x : 0;
 	norm.y = (norm.y != 0) ? 1.0f / norm.y : 0;
 	vec2 min = (GetMin(rect) - line.start) * norm;
@@ -257,18 +258,18 @@ bool LineRectangle(const Line2D& line, const Rectangle2D& rect) {
 #endif
 
 bool LineOrientedRectangle(const Line2D& line, const OrientedRectangle& rectangle) {
-	float theta = -DEG2RAD(rectangle.rotation);
+	float theta = -math::radians(rectangle.rotation);
 	float zRotation2x2[] = {
 		cosf(theta), sinf(theta),
 		-sinf(theta), cosf(theta) };
 	Line2D localLine;
 
 	vec2 rotVector = line.start - rectangle.position;
-	Multiply(rotVector.asArray, vec2(rotVector.x, rotVector.y).asArray, 1, 2, zRotation2x2, 2, 2);
+	math::multiply(glm::value_ptr(rotVector), glm::value_ptr(rotVector), 1, 2, zRotation2x2, 2, 2);
 	localLine.start  = rotVector + rectangle.halfExtents;
 	
 	rotVector = line.end - rectangle.position;
-	Multiply(rotVector.asArray, vec2(rotVector.x, rotVector.y).asArray, 1, 2, zRotation2x2, 2, 2);
+	math::multiply(glm::value_ptr(rotVector), glm::value_ptr(rotVector), 1, 2, zRotation2x2, 2, 2);
 	localLine.end = rotVector + rectangle.halfExtents;
 	
 	Rectangle2D localRectangle(Point2D(), rectangle.halfExtents * 2.0f);
@@ -296,12 +297,13 @@ bool CircleRectangle(const Circle& circle, const Rectangle2D& rect) {
 
 bool CircleOrientedRectangle(const Circle& circle, const OrientedRectangle& rect) {
 	vec2 rotVector = circle.position - rect.position;
-	float theta = -DEG2RAD(rect.rotation);
+	float theta = -math::radians(rect.rotation);
 	float zRotation2x2[] = { 
 		cosf(theta), sinf(theta),
 		-sinf(theta), cosf(theta) };
-	Multiply(rotVector.asArray, vec2(rotVector.x, rotVector.y).asArray, 1, 2, zRotation2x2, 2, 2);
-	
+	math::multiply(glm::value_ptr(rotVector), glm::value_ptr(rotVector), 1, 2, zRotation2x2, 2, 2);
+
+
 	Circle localCircle(rotVector + rect.halfExtents, circle.radius);
 	Rectangle2D localRectangle(Point2D(), rect.halfExtents * 2.0f);
 
@@ -333,13 +335,13 @@ Interval2D GetInterval(const Rectangle2D& rect, const vec2& axis) {
 
 	// Set interval first projected vertex
 	Interval2D result;
-	result.min = Dot(axis, verts[0]);
+	result.min = math::dot(axis, verts[0]);
 	result.max = result.min;
 
 	// For all other verts
 	for (int i = 1; i < 4; ++i) {
 		// Project vertex
-		float projection = Dot(axis, verts[i]);
+		float projection = math::dot(axis, verts[i]);
 		result.min = (projection < result.min) ? projection : result.min;
 		result.max = (projection > result.max) ? projection : result.max;
 	}
@@ -376,25 +378,25 @@ Interval2D GetInterval(const OrientedRectangle& rect, const vec2& axis) {
 	vec2 max = GetMax(nonOrientedRect);
 	vec2 verts[] = { min, max, vec2(min.x, max.y), vec2(max.x, min.y) };
 
-	float theta = DEG2RAD(rect.rotation);
+	float theta = math::radians(rect.rotation);
 	float zRotation2x2[] = {
 		cosf(theta), sinf(theta),
 		-sinf(theta), cosf(theta) };
 
 	for (int i = 0; i < 4; ++i) {
 		vec2 rotVector = verts[i] - rect.position;
-		Multiply(rotVector.asArray, vec2(rotVector.x, rotVector.y).asArray, 1, 2, zRotation2x2, 2, 2);
+		math::multiply(glm::value_ptr(rotVector), glm::value_ptr(rotVector), 1, 2, zRotation2x2, 2, 2);
 		verts[i] = rotVector + rect.position;
 	}
 
 	// Set interval first projected vertex
 	Interval2D result;
-	result.min = result.max = Dot(axis, verts[0]);
+	result.min = result.max = math::dot(axis, verts[0]);
 
 	// For all other verts
 	for (int i = 1; i < 4; ++i) {
 		// Project vertex
-		float projection = Dot(axis, verts[i]);
+		float projection = math::dot(axis, verts[i]);
 		result.min = (projection < result.min) ? projection : result.min;
 		result.max = (projection > result.max) ? projection : result.max;
 	}
@@ -413,17 +415,21 @@ bool RectangleOrientedRectangle(const Rectangle2D& rect1, const OrientedRectangl
 	vec2 axisToTest[]{
 		vec2(1, 0),
 		vec2(0, 1),
-		Normalized(vec2(rect2.halfExtents.x, 0)),
-		Normalized(vec2(0, rect2.halfExtents.y))
+		math::normalized(vec2(rect2.halfExtents.x, 0)),
+		math::normalized(vec2(0, rect2.halfExtents.y))
 	};
 
-	float theta = DEG2RAD(rect2.rotation);
+	float theta = math::radians(rect2.rotation);
 	float zRotation2x2[] = {
 		cosf(theta), sinf(theta),
 		-sinf(theta), cosf(theta) };
-	Multiply(axisToTest[2].asArray, Normalized(vec2(rect2.halfExtents.x, 0)).asArray, 1, 2, zRotation2x2, 2, 2);
-	Multiply(axisToTest[3].asArray, Normalized(vec2(0, rect2.halfExtents.y)).asArray, 1, 2, zRotation2x2, 2, 2);
 
+	math::multiply(glm::value_ptr(axisToTest[2]),
+					glm::value_ptr(math::normalized(math::vec2(rect2.halfExtents.x, 0))),
+					1, 2, zRotation2x2, 2, 2);
+	math::multiply(glm::value_ptr(axisToTest[3]),
+					glm::value_ptr(math::normalized(math::vec2(0, rect2.halfExtents.y))),
+					1, 2, zRotation2x2, 2, 2);
 	for (int i = 0; i < 4; ++i) {
 		if (!OverlapOnAxis(rect1, rect2, axisToTest[i])) {
 			// Intervals don't overlap, seperating axis found
@@ -452,21 +458,20 @@ bool OrientedRectangleOrientedRectangleSAT(const OrientedRectangle& rect1, const
 	};
 
 	// Collision axis of rect 2
-	float theta = DEG2RAD(rect2.rotation);
+	float theta = math::radians(rect2.rotation);
 	float zRotation2x2[] = {
 		cosf(theta), sinf(theta),
 		-sinf(theta), cosf(theta) };
-	Multiply(axisToTest[2].asArray, Normalized(vec2(rect2.halfExtents.x, 0)).asArray, 1, 2, zRotation2x2, 2, 2);
-	Multiply(axisToTest[3].asArray, Normalized(vec2(0, rect2.halfExtents.y)).asArray, 1, 2, zRotation2x2, 2, 2);
-
+	math::multiply(glm::value_ptr(axisToTest[2]), glm::value_ptr(math::normalized(math::vec2(rect2.halfExtents.x, 0))), 1, 2, zRotation2x2, 2, 2);
+	math::multiply(glm::value_ptr(axisToTest[3]), glm::value_ptr(math::normalized(math::vec2(0, rect2.halfExtents.y))), 1, 2, zRotation2x2, 2, 2);
 	// Collision axis of rect 1
-	theta = DEG2RAD(rect1.rotation);
+	theta = math::radians(rect1.rotation);
 	zRotation2x2[0] = cosf(theta);
 	zRotation2x2[1] = sinf(theta);
 	zRotation2x2[2] = -sinf(theta);
 	zRotation2x2[3] = cosf(theta);
-	Multiply(axisToTest[4].asArray, Normalized(vec2(rect1.halfExtents.x, 0)).asArray, 1, 2, zRotation2x2, 2, 2);
-	Multiply(axisToTest[5].asArray, Normalized(vec2(0, rect1.halfExtents.y)).asArray, 1, 2, zRotation2x2, 2, 2);
+	math::multiply(glm::value_ptr(axisToTest[4]), glm::value_ptr(math::normalized(math::vec2(rect1.halfExtents.x, 0))), 1, 2, zRotation2x2, 2, 2);
+	math::multiply(glm::value_ptr(axisToTest[5]), glm::value_ptr(math::normalized(math::vec2(0, rect1.halfExtents.y))), 1, 2, zRotation2x2, 2, 2);
 
 	for (int i = 0; i < 6; ++i) {
 		if (!OverlapOnAxis(rect1, rect2, axisToTest[i])) {
@@ -486,11 +491,13 @@ bool OrientedRectangleOrientedRectangle(const OrientedRectangle& r1, const Orien
 
 	localRect2.rotation = r2.rotation - r1.rotation;
 	vec2 rotVector = r2.position - r1.position;
-	float theta = -DEG2RAD(r1.rotation);
+	float theta = -math::radians(r1.rotation);
 	float zRotation2x2[] = {
 		cosf(theta), sinf(theta),
 		-sinf(theta), cosf(theta) };
-	Multiply(rotVector.asArray, vec2(rotVector.x, rotVector.y).asArray, 1, 2, zRotation2x2, 2, 2);
+	math::multiply(glm::value_ptr(rotVector),
+					 glm::value_ptr(math::vec2(rotVector.x, rotVector.y)),
+					 1, 2, zRotation2x2, 2, 2);
 	localRect2.position = rotVector + r1.halfExtents;
 
 	return RectangleOrientedRectangle(localRect1, localRect2);
@@ -506,9 +513,9 @@ Circle ContainingCircle(Point2D* pointArray, int arrayCount) {
 	Circle result(center, 1.0f);
 
 	// Find the squared radius
-	result.radius = MagnitudeSq(center - pointArray[0]);
+	result.radius = math::lengthSq(center - pointArray[0]);
 	for (int i = 1; i < arrayCount; ++i) {
-		float distance = MagnitudeSq(center - pointArray[i]);
+		float distance = math::lengthSq(center - pointArray[i]);
 		if (distance > result.radius) {
 			result.radius = distance;
 		}
@@ -530,7 +537,7 @@ Circle ContainingCircleAlt(Point2D* pointArray, int arrayCount) {
 		max.y = pointArray[i].y > max.y ? pointArray[i].y : max.y;
 	}
 
-	return Circle((min + max) * 0.5f, Magnitude(max - min) * 0.5f);
+	return Circle((min + max) * 0.5f, math::length(max - min) * 0.5f);
 }
 
 Rectangle2D ContainingRectangle(Point2D* pointArray, int arrayCount) {

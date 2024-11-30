@@ -4,11 +4,11 @@
 #include <vector>
 #include <utility>
 //#include <cfloat>
-#include "vectors.h"
-#include "matrices.h"
+#include "math_config.h"
+// #include "matrices.h"
 #include <ostream>
 
-typedef vec3 Point;
+typedef math::vec3 Point;
 
 typedef struct Line {
 	Point start;
@@ -21,54 +21,54 @@ typedef struct Line {
 
 typedef struct Ray {
 	Point origin;
-	vec3 direction;
+	math::vec3 direction;
 
 	inline Ray() : direction(0.0f, 0.0f, 1.0f) {}
-	inline Ray(const Point& o, const vec3& d) :
+	inline Ray(const Point& o, const math::vec3& d) :
 		origin(o), direction(d) {
 		NormalizeDirection();
 	}
 	inline void NormalizeDirection() {
-		Normalize(direction);
+		math::normalized(direction);
 	}
 } Ray;
 
 typedef struct Sphere {
 	Point position;
-	float radius;
+	math::real radius;
 
 	inline Sphere() : radius(1.0f) { }
-	inline Sphere(const Point& p, float r) :
+	inline Sphere(const Point& p, math::real r) :
 		position(p), radius(r) { }
 } Sphere;
 
 typedef struct AABB {
 	Point position;
-	vec3 size; // HALF SIZE!
+	math::vec3 size; // HALF SIZE!
 
 	inline AABB() : size(1, 1, 1) { }
-	inline AABB(const Point& p, const vec3& s) :
+	inline AABB(const Point& p, const math::vec3& s) :
 		position(p), size(s) { }
 } AABB;
 
 typedef struct OBB {
 	Point position;
-	vec3 size; // HALF SIZE!
-	mat3 orientation;
+	math::vec3 size; // HALF SIZE!
+	math::mat3 orientation;
 
 	inline OBB() : size(1, 1, 1) { }
-	inline OBB(const Point& p, const vec3& s) :
+	inline OBB(const Point& p, const math::vec3& s) :
 		position(p), size(s) { }
-	inline OBB(const Point& p, const vec3& s, const mat3& o) :
+	inline OBB(const Point& p, const math::vec3& s, const math::mat3& o) :
 		position(p), size(s), orientation(o) { }
 } OBB;
 
 typedef struct Plane {
-	vec3 normal;
-	float distance;
+	math::vec3 normal;
+	math::real distance;
 
 	inline Plane() : normal(1, 0, 0) { }
-	inline Plane(const vec3& n, float d) :
+	inline Plane(const math::vec3& n, math::real d) :
 		normal(n), distance(d) { }
 } Plane;
 
@@ -144,8 +144,8 @@ protected:
 	Mesh* content;
 	AABB bounds;
 public:
-	vec3 position;
-	vec3 rotation;
+	math::vec3 position;
+	math::vec3 rotation;
 	bool flag;
 	Model* parent;
 
@@ -161,14 +161,14 @@ public:
 };
 
 typedef struct Interval {
-	float min;
-	float max;
+	math::real min;
+	math::real max;
 } Interval;
 
 typedef struct Frustum {
 	union {
 		struct {
-			float values[24];  // 4 floats per plane (normal + distance) * 6 planes
+			math::real values[24];  // 4 floats per plane (normal + distance) * 6 planes
 		};
 		Plane planes[6];
 	};
@@ -192,18 +192,18 @@ typedef struct Frustum {
 } Frustum;
 
 typedef struct RaycastResult {
-	vec3 point;
-	vec3 normal;
-	float t;
+	math::vec3 point;
+	math::vec3 normal;
+	math::real t;
 	bool hit;
 } RaycastResult;
 
 void ResetRaycastResult(RaycastResult* outResult);
 
 Point Intersection(Plane p1, Plane p2, Plane p3);
-void GetCorners(const Frustum& f, vec3* outCorners);
+void GetCorners(const Frustum& f, math::vec3* outCorners);
 
-typedef vec3 Point3D;
+typedef math::vec3 Point3D;
 typedef Line Line3D;
 typedef Ray Ray3D;
 typedef AABB Rectangle3D;
@@ -217,14 +217,14 @@ std::ostream& operator<<(std::ostream& os, const OBB& shape);
 std::ostream& operator<<(std::ostream& os, const Plane& shape);
 std::ostream& operator<<(std::ostream& os, const Triangle& shape);
 
-float Length(const Line& line);
-float LengthSq(const Line& line);
+math::real Length(const Line& line);
+math::real LengthSq(const Line& line);
 Ray FromPoints(const Point& from, const Point& to);
-vec3 GetMin(const AABB& aabb);
-vec3 GetMax(const AABB& aabb);
-AABB FromMinMax(const vec3& min, const vec3& max);
-float PlaneEquation(const Point& point, const Plane& plane);
-float PlaneEquation(const Plane& plane, const Point& point);
+math::vec3 GetMin(const AABB& aabb);
+math::vec3 GetMax(const AABB& aabb);
+AABB FromMinMax(const math::vec3& min, const math::vec3& max);
+math::real PlaneEquation(const Point& point, const Plane& plane);
+math::real PlaneEquation(const Plane& plane, const Point& point);
 
 bool PointInSphere(const Point& point, const Sphere& sphere);
 bool PointInAABB(const Point& point, const AABB& aabb);
@@ -264,15 +264,15 @@ Point ClosestPoint(const Point& point, const Line& line);
 Point ClosestPoint(const Point& point, const Ray& ray);
 Point ClosestPoint(const Point& p, const Triangle& t);
 
-Interval GetInterval(const AABB& aabb, const vec3& axis);
-Interval GetInterval(const OBB& obb, const vec3& axis);
-Interval GetInterval(const Triangle& triangle, const vec3& axis);
+Interval GetInterval(const AABB& aabb, const math::vec3& axis);
+Interval GetInterval(const OBB& obb, const math::vec3& axis);
+Interval GetInterval(const Triangle& triangle, const math::vec3& axis);
 
-bool OverlapOnAxis(const AABB& aabb, const OBB& obb, const vec3& axis);
-bool OverlapOnAxis(const OBB& obb1, const OBB& obb2, const vec3& axis);
-bool OverlapOnAxis(const AABB& aabb, const Triangle& triangle, const vec3& axis);
-bool OverlapOnAxis(const OBB& obb, const Triangle& triangle, const vec3& axis);
-bool OverlapOnAxis(const Triangle& t1, const Triangle& t2, const vec3& axis);
+bool OverlapOnAxis(const AABB& aabb, const OBB& obb, const math::vec3& axis);
+bool OverlapOnAxis(const OBB& obb1, const OBB& obb2, const math::vec3& axis);
+bool OverlapOnAxis(const AABB& aabb, const Triangle& triangle, const math::vec3& axis);
+bool OverlapOnAxis(const OBB& obb, const Triangle& triangle, const math::vec3& axis);
+bool OverlapOnAxis(const Triangle& t1, const Triangle& t2, const math::vec3& axis);
 
 bool SphereSphere(const Sphere& s1, const Sphere& s2);
 bool SphereAABB(const Sphere& sphere, const AABB& aabb);
@@ -319,8 +319,8 @@ bool Linetest(const Line& line, const AABB& aabb);
 bool Linetest(const Line& line, const OBB& obb);
 bool Linetest(const Line& line, const Plane& plane);
 
-vec3 BarycentricOptimized(const Point& p, const Triangle& t);
-vec3 Centroid(const Triangle& t);
+math::vec3 BarycentricOptimized(const Point& p, const Triangle& t);
+math::vec3 Centroid(const Triangle& t);
 
 bool PointInTriangle(const Point& p, const Triangle& t);
 Plane FromTriangle(const Triangle& t);
@@ -330,7 +330,7 @@ bool TriangleAABB(const Triangle& t, const AABB& a);
 bool TriangleOBB(const Triangle& t, const OBB& o);
 bool TriangleTriangle(const Triangle& t1, const Triangle& t2);
 bool TriangleTriangleRobust(const Triangle& t1, const Triangle& t2);
-bool TrianglePlane(const Triangle& t, const Plane& p); 
+bool TrianglePlane(const Triangle& t, const Plane& p);
 
 #define SphereTriangle(s, t) \
 	TriangleSphere(t, s)
@@ -345,8 +345,8 @@ bool TrianglePlane(const Triangle& t, const Plane& p);
 // B - Edge 0, Point 1
 // C - Edge 1, Point 0
 // D - Edge 1, Point 1
-vec3 SatCrossEdge(const vec3& a, const vec3& b, const vec3& c, const vec3& d);
-vec3 Barycentric(const Point& p, const Triangle& t);
+math::vec3 SatCrossEdge(const math::vec3& a, const math::vec3& b, const math::vec3& c, const math::vec3& d);
+math::vec3 Barycentric(const Point& p, const Triangle& t);
 
 void AccelerateMesh(Mesh& mesh);
 void SplitBVHNode(BVHNode* node, const Mesh& model, int depth);
@@ -358,14 +358,14 @@ bool MeshAABB(const Mesh& mesh, const AABB& aabb);
 bool MeshOBB(const Mesh& mesh, const OBB& obb);
 bool MeshPlane(const Mesh& mesh, const Plane& plane);
 bool MeshTriangle(const Mesh& mesh, const Triangle& triangle);
-float MeshRay(const Mesh& mesh, const Ray& ray);
-float Raycast(const Mesh& mesh, const Ray& ray);
-float Raycast(const Model& mesh, const Ray& ray);
+math::real MeshRay(const Mesh& mesh, const Ray& ray);
+math::real Raycast(const Mesh& mesh, const Ray& ray);
+math::real Raycast(const Model& mesh, const Ray& ray);
 
-mat4 GetWorldMatrix(const Model& model);
+math::mat4 GetWorldMatrix(const Model& model);
 OBB GetOBB(const Model& model);
 
-float ModelRay(const Model& model, const Ray& ray);
+math::real ModelRay(const Model& model, const Ray& ray);
 bool Linetest(const Model& model, const Line& line);
 bool ModelSphere(const Model& model, const Sphere& sphere);
 bool ModelAABB(const Model& model, const AABB& aabb);
@@ -381,16 +381,16 @@ bool Intersects(const Frustum& f, const Sphere& s);
 bool Intersects(const Frustum& f, const AABB& aabb);
 bool Intersects(const Frustum& f, const OBB& obb);
 
-vec3 Unproject(const vec3& viewportPoint, const vec2& viewportOrigin, const vec2& viewportSize, const mat4& view, const mat4& projection);
-Ray GetPickRay(const vec2& viewportPoint, const vec2& viewportOrigin, const vec2& viewportSize, const mat4& view, const mat4& projection);
+math::vec3 Unproject(const math::vec3& viewportPoint, const math::vec2& viewportOrigin, const math::vec2& viewportSize, const math::mat4& view, const math::mat4& projection);
+Ray GetPickRay(const math::vec2& viewportPoint, const math::vec2& viewportOrigin, const math::vec2& viewportSize, const math::mat4& view, const math::mat4& projection);
 
 // Chapter 15
 
 typedef struct CollisionManifold {
 	bool colliding;
-	vec3 normal;
-	float depth;
-	std::vector<vec3> contacts;
+	math::vec3 normal;
+	math::real depth;
+	std::vector<math::vec3> contacts;
 };
 void ResetCollisionManifold(CollisionManifold* result);
 
@@ -399,7 +399,7 @@ std::vector<Line> GetEdges(const OBB& obb);
 std::vector<Plane> GetPlanes(const OBB& obb);
 bool ClipToPlane(const Plane& plane, const Line& line, Point* outPoint);
 std::vector<Point> ClipEdgesToOBB(const std::vector<Line>& edges, const OBB& obb);
-float PenetrationDepth(const OBB& o1, const OBB& o2, const vec3& axis, bool* outShouldFlip);
+math::real PenetrationDepth(const OBB& o1, const OBB& o2, const math::vec3& axis, bool* outShouldFlip);
 
 CollisionManifold FindCollisionFeatures(const Sphere& A, const Sphere& B);
 CollisionManifold FindCollisionFeatures(const OBB& A, const Sphere& B);

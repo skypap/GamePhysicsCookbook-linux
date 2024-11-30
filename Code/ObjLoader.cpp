@@ -45,7 +45,7 @@ bool LoadMesh(const char* szFilePath, Mesh* mesh) {
 				float vy = attrib.vertices[3 * idx.vertex_index + 1];
 				float vz = attrib.vertices[3 * idx.vertex_index + 2];
 
-				mesh->vertices[vi++] = vec3(vx, vy, vz);
+				mesh->vertices[vi++] = math::vec3(vx, vy, vz);
 			}
 			index_offset += fv;
 

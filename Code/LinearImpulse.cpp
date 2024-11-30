@@ -25,9 +25,9 @@ void LinearImpulse::Initialize(int width, int height) {
 	float val[] = { 0.5f, 1.0f, -1.5f, 0.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, val);
 
-	camera.SetTarget(vec3(3.75622f, 2.98255f, 0.0f));
+	camera.SetTarget(math::vec3(3.75622f, 2.98255f, 0.0f));
 	camera.SetZoom(9.0f);
-	camera.SetRotation(vec2(-67.9312f, 19.8f));
+	camera.SetRotation(math::vec2(-67.9312f, 19.8f));
 
 	ResetDemo();
 }
@@ -48,28 +48,28 @@ void LinearImpulse::ResetDemo() {
 	box0.type = box1.type = RIGIDBODY_TYPE_BOX;
 
 	if (!drop) {
-		sphere0.position = vec3(-10, 1.5f, -5);
-		sphere1.position = vec3(5, 1.5f, 2.5f);
-		box0.position = vec3(-10, 1.5f, -5);
-		box1.position = vec3(5, 1.5f, 2.5f);
+		sphere0.position = math::vec3(-10, 1.5f, -5);
+		sphere1.position = math::vec3(5, 1.5f, 2.5f);
+		box0.position = math::vec3(-10, 1.5f, -5);
+		box1.position = math::vec3(5, 1.5f, 2.5f);
 
-		vec3 impulseDirection = vec3(-10, 1.5f, -5) - vec3(5, 1.5f, 2.5f);
-		sphere1.AddLinearImpulse(impulseDirection + vec3(0, 5, 0));
-		box1.AddLinearImpulse(impulseDirection + vec3(0, 5, 0));
+		math::vec3 impulseDirection = math::vec3(-10, 1.5f, -5) - math::vec3(5, 1.5f, 2.5f);
+		sphere1.AddLinearImpulse(impulseDirection + math::vec3(0, 5, 0));
+		box1.AddLinearImpulse(impulseDirection + math::vec3(0, 5, 0));
 
-		impulseDirection = vec3(5, 1.5f, 2.5f) - vec3(-10, 1.5f, -5);
-		sphere0.AddLinearImpulse(impulseDirection + vec3(0, 5, 0));
-		box0.AddLinearImpulse(impulseDirection + vec3(0, 5, 0));
+		impulseDirection = math::vec3(5, 1.5f, 2.5f) - math::vec3(-10, 1.5f, -5);
+		sphere0.AddLinearImpulse(impulseDirection + math::vec3(0, 5, 0));
+		box0.AddLinearImpulse(impulseDirection + math::vec3(0, 5, 0));
 	}
 	else {
-		sphere0.position = vec3(0, 1.2, 0);
-		sphere1.position = vec3(0, 4, 0);
-		box0.position = vec3(0, 1.2, 0);
-		box1.position = vec3(0, 4, 0);
+		sphere0.position = math::vec3(0, 1.2, 0);
+		sphere1.position = math::vec3(0, 4, 0);
+		box0.position = math::vec3(0, 1.2, 0);
+		box1.position = math::vec3(0, 4, 0);
 	}
 
 	groundBox = RigidbodyVolume(RIGIDBODY_TYPE_BOX);
-	groundBox.box.size = vec3(10.0f, 0.15f, 10.0f);
+	groundBox.box.size = math::vec3(10.0f, 0.15f, 10.0f);
 	groundBox.mass = 0.0f;
 
 	if (use_spheres) {
@@ -97,8 +97,8 @@ float LinearImpulse::Random(float min, float max) {
 	return (random*range) + min;
 }
 
-vec3 LinearImpulse::Random(vec3 min, vec3 max) {
-	vec3 result;
+math::vec3 LinearImpulse::Random(math::vec3 min, math::vec3 max) {
+	math::vec3 result;
 	result.x = Random(min.x, max.x);
 	result.y = Random(min.y, max.y);
 	result.z = Random(min.z, max.z);

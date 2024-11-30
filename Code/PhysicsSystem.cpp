@@ -125,7 +125,7 @@ void PhysicsSystem::Update(float deltaTime) {
 
 			float depth = fmax(results[i].depth - PenetrationSlack, 0.0f);
 			float scalar = (totalMass == 0.0f) ? 0.0f : depth / totalMass;
-			vec3 correction = results[i].normal * scalar * LinearProjectionPercent;
+			math::vec3 correction = results[i].normal * scalar * LinearProjectionPercent;
 
 			m1->position = m1->position - correction * m1->InvMass();
 			m2->position = m2->position + correction * m2->InvMass();

@@ -25,9 +25,9 @@ void RotationalForce::Initialize(int width, int height) {
 	float val[] = { 0.5f, 1.0f, -1.5f, 0.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, val);
 
-	camera.SetTarget(vec3(3.75622f, 2.98255f, 0.0f));
+	camera.SetTarget(math::vec3(3.75622f, 2.98255f, 0.0f));
 	camera.SetZoom(12.0f);
-	camera.SetRotation(vec2(-67.9312f, 19.8f));
+	camera.SetRotation(math::vec2(-67.9312f, 19.8f));
 
 	ResetDemo();
 }
@@ -69,11 +69,11 @@ void RotationalForce::ResetDemo() {
 
 	// Créer explicitement des RigidbodyVolume
 	bodies[0] = RigidbodyVolume(RIGIDBODY_TYPE_BOX);
-	bodies[0].position = vec3(0, 10, 0);
+	bodies[0].position = math::vec3(0, 10, 0);
 	static_cast<RigidbodyVolume&>(bodies[0]).mass = 1.0f;
 
 	bodies[1] = RigidbodyVolume(RIGIDBODY_TYPE_BOX);
-	bodies[1].position = vec3(1.6, 2, 0);
+	bodies[1].position = math::vec3(1.6, 2, 0);
 	static_cast<RigidbodyVolume&>(bodies[1]).mass = 1.0f;
 
 	for (int i = 0; i < bodies.size(); ++i) {
@@ -81,7 +81,7 @@ void RotationalForce::ResetDemo() {
 	}
 
 	groundBox = RigidbodyVolume(RIGIDBODY_TYPE_BOX);
-	groundBox.box.size = vec3(15.0f, 0.15f, 15.0f);
+	groundBox.box.size = math::vec3(15.0f, 0.15f, 15.0f);
 	static_cast<RigidbodyVolume&>(groundBox).mass = 0.0f;
 
 	physicsSystem.AddRigidbody(&groundBox);
@@ -99,8 +99,8 @@ float RotationalForce::Random(float min, float max) {
 	return (random*range) + min;
 }
 
-vec3 RotationalForce::Random(vec3 min, vec3 max) {
-	vec3 result;
+math::vec3 RotationalForce::Random(math::vec3 min, math::vec3 max) {
+	math::vec3 result;
 	result.x = Random(min.x, max.x);
 	result.y = Random(min.y, max.y);
 	result.z = Random(min.z, max.z);
@@ -161,7 +161,7 @@ void RotationalForce::Update(float dt) {
 	else {
 		physicsSystem.Update(dt);
 		if (mouseLeftDown) {
-			ray = GetPickRay(mousePos, vec2(), size, camera.GetViewMatrix(), camera.GetProjectionMatrix());
+			ray = GetPickRay(mousePos, math::vec2(), size, camera.GetViewMatrix(), camera.GetProjectionMatrix());
 			ray.NormalizeDirection();
 		}
 

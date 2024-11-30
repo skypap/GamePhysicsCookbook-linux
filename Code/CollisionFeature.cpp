@@ -12,16 +12,16 @@ void CollisionFeature::Initialize(int width, int height) {
 	DemoBase::Initialize(width, height);
 	size_imgui_window = true;
 
-	manipulator = manTranslation.asArray;
+	manipulator = glm::value_ptr(manTranslation);
 	manipulating = -1;
 	transformWorld = false;
 
-	obb[0].position = vec3(4, 2, 0);
-	obb[1].position = vec3(-4, -2, 0);
-	obb[1].orientation = Rotation3x3(30.0f, 20.0f, 0.0f);
+	obb[0].position = math::vec3(4, 2, 0);
+	obb[1].position = math::vec3(-4, -2, 0);
+	obb[1].orientation = math::rotation3x3(30.0f, 20.0f, 0.0f);
 
-	sphere[0].position = vec3(-4, 2, 0);
-	sphere[1].position = vec3(4, -2, 0);
+	sphere[0].position = math::vec3(-4, 2, 0);
+	sphere[1].position = math::vec3(4, -2, 0);
 	sphere[1].radius = 0.5f;
 
 	
@@ -43,16 +43,16 @@ void CollisionFeature::ImGUI() {
 	}
 
 	ImGui::Begin("SAT Test Demo", 0, ImGuiWindowFlags_NoResize);
-	if (ImGui::RadioButton("Translate", manipulator == manTranslation.asArray)) {
-		manipulator = manTranslation.asArray;
+	if (ImGui::RadioButton("Translate", manipulator == glm::value_ptr(manTranslation))) {
+		manipulator = glm::value_ptr(manTranslation);
 	}
 	ImGui::SameLine();
-	if (ImGui::RadioButton("Rotate", manipulator == manRotation.asArray)) {
-		manipulator = manRotation.asArray;
+	if (ImGui::RadioButton("Rotate", manipulator == glm::value_ptr(manRotation))) {
+		manipulator = glm::value_ptr(manRotation);
 	}
 	ImGui::SameLine();
-	if (ImGui::RadioButton("Scale", manipulator == manScale.asArray)) {
-		manipulator = manScale.asArray;
+	if (ImGui::RadioButton("Scale", manipulator == glm::value_ptr(manScale))) {
+		manipulator = glm::value_ptr(manScale);
 	}
 
 	if (ImGui::RadioButton("Local", transformWorld == false)) {
@@ -68,15 +68,15 @@ void CollisionFeature::ImGUI() {
 		// ImGuizmo::MODE currentGizmoMode = transformWorld ? ImGuizmo::WORLD : ImGuizmo::LOCAL;
 		// ImGuizmo::OPERATION currentGizmoOperation = ImGuizmo::ROTATE;
 		
-		if (manipulator == manTranslation.asArray) {
+		if (manipulator == glm::value_ptr(manTranslation)) {
 			// currentGizmoOperation = ImGuizmo::TRANSLATE;
 			// ImGuizmo::Enable(true);
 		}
-		if (manipulator == manRotation.asArray) {
+		if (manipulator == glm::value_ptr(manRotation)) {
 			// currentGizmoOperation = ImGuizmo::ROTATE;
 			// ImGuizmo::Enable(true);// manipulating == 0 || manipulating == 1);
 		}
-		if (manipulator == manScale.asArray) {
+		if (manipulator == glm::value_ptr(manScale)) {
 			// currentGizmoOperation = ImGuizmo::SCALE;
 			// ImGuizmo::Enable(true);
 		}
@@ -90,27 +90,27 @@ void CollisionFeature::ImGUI() {
 		// ImGuizmo::DecomposeMatrixToComponents(manipulator, matrixTranslation, matrixRotation, matrixScale);
 
 		if (manipulating == 0 || manipulating == 1) {
-			if (manipulator == manTranslation.asArray) {
+			if (manipulator == glm::value_ptr(manTranslation)) {
 				obb[manipulating].position.x = matrixTranslation[0];
 				obb[manipulating].position.y = matrixTranslation[1];
 				obb[manipulating].position.z = matrixTranslation[2];
 			}
-			else if (manipulator == manScale.asArray) {
+			else if (manipulator == glm::value_ptr(manScale)) {
 				obb[manipulating].size.x = matrixScale[0];
 				obb[manipulating].size.y = matrixScale[1];
 				obb[manipulating].size.z = matrixScale[2];
 			}
-			else if (manipulator == manRotation.asArray) {
-				obb[manipulating].orientation = Cut(manRotation, 3, 3);
+			else if (manipulator == glm::value_ptr(manRotation)) {
+				obb[manipulating].orientation = math::cut(manRotation, 3, 3);
 			}
 		}
 		else if (manipulating == 2 || manipulating == 3) {
-			if (manipulator == manTranslation.asArray) {
+			if (manipulator == glm::value_ptr(manTranslation)) {
 				sphere[manipulating - 2].position.x = matrixTranslation[0];
 				sphere[manipulating - 2].position.y = matrixTranslation[1];
 				sphere[manipulating - 2].position.z = matrixTranslation[2];
 			}
-			else if (manipulator == manScale.asArray) {
+			else if (manipulator == glm::value_ptr(manScale)) {
 				float diff0 = fabsf(sphere[manipulating - 2].radius - matrixScale[0]);
 				float diff1 = fabsf(sphere[manipulating - 2].radius - matrixScale[1]);
 				float diff2 = fabs(sphere[manipulating - 2].radius - matrixScale[2]);
@@ -215,7 +215,7 @@ void CollisionFeature::Update(float dt) {
 	DemoBase::Update(dt);
 
 	if (mouseLeftDown) {
-		Ray screenRay = GetPickRay(mousePos, vec2(), size, camera.GetViewMatrix(), camera.GetProjectionMatrix());
+		Ray screenRay = GetPickRay(mousePos, math::vec2(), size, camera.GetViewMatrix(), camera.GetProjectionMatrix());
 		screenRay.NormalizeDirection();
 
 		std::vector<RaycastResult> allCasts;
@@ -238,33 +238,33 @@ void CollisionFeature::Update(float dt) {
 			}
 		}
 
-		bool trans = manipulator == manTranslation.asArray;
-		bool rot = manipulator == manRotation.asArray;
-		bool scal = manipulator == manScale.asArray;
+		bool trans = manipulator == glm::value_ptr(manTranslation);
+		bool rot = manipulator == glm::value_ptr(manRotation);
+		bool scal = manipulator == glm::value_ptr(manScale);
 
 		if (!raycastResult.hit) {
 			manipulating = -1;
 		}
 		else if (manipulating < 2 && wasManipulating != manipulating) {
-			manTranslation = Translation(obb[manipulating].position.x, obb[manipulating].position.y, obb[manipulating].position.z);
-			manRotation = FromMat3(obb[manipulating].orientation) * manTranslation;
+			manTranslation = math::translation({obb[manipulating].position.x, obb[manipulating].position.y, obb[manipulating].position.z});
+			manRotation = math::fromMat3(obb[manipulating].orientation) * manTranslation;
 			manTranslation = manRotation;
-			manScale = Scale(obb[manipulating].size.x, obb[manipulating].size.y, obb[manipulating].size.z) * manTranslation;
+			manScale = math::scale({obb[manipulating].size.x, obb[manipulating].size.y, obb[manipulating].size.z}) * manTranslation;
 		}
 		else if (manipulating >= 2 && manipulating < 4 && wasManipulating != manipulating) {
-			manTranslation = Translation(sphere[manipulating - 2].position.x, sphere[manipulating - 2].position.y, sphere[manipulating - 2].position.z);
+			manTranslation = math::translation({sphere[manipulating - 2].position.x, sphere[manipulating - 2].position.y, sphere[manipulating - 2].position.z});
 			manRotation = manTranslation;
-			manScale = Scale(sphere[manipulating - 2].radius, sphere[manipulating - 2].radius, sphere[manipulating - 2].radius) * manTranslation;
+			manScale = math::scale({sphere[manipulating - 2].radius, sphere[manipulating - 2].radius, sphere[manipulating - 2].radius}) * manTranslation;
 		}
 
 		if (trans) {
-			manipulator = manTranslation.asArray;
+			manipulator = glm::value_ptr(manTranslation);
 		}
 		else if (rot) {
-			manipulator = manRotation.asArray;
+			manipulator = glm::value_ptr(manRotation);
 		}
 		else if (scal) {
-			manipulator = manScale.asArray;
+			manipulator = glm::value_ptr(manScale);
 		}
 	}
 }

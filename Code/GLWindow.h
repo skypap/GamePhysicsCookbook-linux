@@ -2,11 +2,11 @@
 #define _H_GL_WINDOW_
 
 #include "IWindow.h"
-#include "matrices.h"
+#include "math_config.h"
 
 class GLWindow : public IWindow {
 protected:
-	vec2 m_vecMousePos;
+	math::vec2 m_vecMousePos;
 	unsigned int mouseButtonState;
 	bool keyboardState[256];
 public:
@@ -25,7 +25,7 @@ public:
 	virtual void OnKeyDown(int keyCode);
 	virtual void OnKeyUp(int keyCode);
 
-	vec2 GetMousePosition();
+	math::vec2 GetMousePosition();
 	bool MouseButonDown(int button);
 	bool KeyDown(int key);
 

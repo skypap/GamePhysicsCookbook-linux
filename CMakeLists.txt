@@ -5,7 +5,15 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules" ${CMAKE_MODULE_PATH})
+include(FetchContent)
 
+# Configurer et fetcher GLM
+FetchContent_Declare(
+        glm
+        GIT_REPOSITORY https://github.com/g-truc/glm.git
+        GIT_TAG 0.9.9.8  # Tu peux changer la version si tu veux
+)
+FetchContent_MakeAvailable(glm)
 # Dependencies
 find_package(SDL2 REQUIRED)
 find_package(GLEW REQUIRED)
@@ -40,7 +48,8 @@ file(GLOB_RECURSE SOURCES
 #list(FILTER SOURCES EXCLUDE REGEX ".*imgui.*")
 list(FILTER SOURCES EXCLUDE REGEX ".*main-win32.*")
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES}
+        Code/math_config.h)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
         ${SDL2_INCLUDE_DIRS}
@@ -54,8 +63,12 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         ${GLEW_LIBRARIES}
         ${SDL2_LIBRARIES}
         imgui
+        glm::glm  # Ajouter GL
 )
-
+option(USE_DOUBLE_PRECISION "Use double precision for math" OFF)
+if(USE_DOUBLE_PRECISION)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_DOUBLE_PRECISION)
+endif()
 # Copy assets
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory

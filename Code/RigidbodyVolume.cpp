@@ -7,16 +7,16 @@ void RigidbodyVolume::ApplyForces() {
 }
 
 #ifndef LINEAR_ONLY
-void  RigidbodyVolume::AddRotationalImpulse(const vec3& point, const vec3& impulse) {
-	vec3 centerOfMass = position;
-	vec3 torque = Cross(point - centerOfMass, impulse);
+void  RigidbodyVolume::AddRotationalImpulse(const math::vec3& point, const math::vec3& impulse) {
+	math::vec3 centerOfMass = position;
+	math::vec3 torque = math::cross(point - centerOfMass, impulse);
 
-	vec3 angAccel = MultiplyVector(torque, InvTensor());
+	math::vec3 angAccel = math::multiplyVector(torque, InvTensor());
 	angVel = angVel + angAccel;
 }
 #endif
 
-void RigidbodyVolume::AddLinearImpulse(const vec3& impulse) {
+void RigidbodyVolume::AddLinearImpulse(const math::vec3& impulse) {
 	velocity = velocity + impulse;
 }
 
@@ -32,10 +32,10 @@ void RigidbodyVolume::SynchCollisionVolumes() {
 	box.position = position;
 
 #ifndef LINEAR_ONLY
-	box.orientation = Rotation3x3(
-		RAD2DEG(orientation.x),
-		RAD2DEG(orientation.y),
-		RAD2DEG(orientation.z)
+	box.orientation = math::rotation3x3(
+		math::degrees(orientation.x),
+		math::degrees(orientation.y),
+		math::degrees(orientation.z)
 	);
 #endif
 }
@@ -52,9 +52,9 @@ void RigidbodyVolume::Render() {
 }
 
 #ifndef LINEAR_ONLY
-mat4 RigidbodyVolume::InvTensor() {
+math::mat4 RigidbodyVolume::InvTensor() {
 	if (mass == 0) {
-		return mat4(
+		return math::mat4(
 			0, 0, 0, 0,
 			0, 0, 0, 0,
 			0, 0, 0, 0,
@@ -76,7 +76,7 @@ mat4 RigidbodyVolume::InvTensor() {
 		iw = 1.0f;
 	}
 	else if (mass != 0 && type == RIGIDBODY_TYPE_BOX) {
-		vec3 size = box.size * 2.0f;
+		math::vec3 size = box.size * 2.0f;
 		float fraction = (1.0f / 12.0f);
 
 		float x2 = size.x * size.x;
@@ -89,7 +89,7 @@ mat4 RigidbodyVolume::InvTensor() {
 		iw = 1.0f;
 	}
 
-	return Inverse(mat4(
+	return math::inverse(math::mat4(
 		ix, 0, 0, 0,
 		0, iy, 0, 0,
 		0, 0, iz, 0,
@@ -101,7 +101,7 @@ void RigidbodyVolume::Update(float dt) {
 	// Integrate velocity
 	const float damping = 0.98f;
 
-	vec3 acceleration = forces * InvMass();
+	math::vec3 acceleration = forces * InvMass();
 	velocity = velocity + acceleration * dt;
 	velocity = velocity * damping;
 
@@ -117,7 +117,7 @@ void RigidbodyVolume::Update(float dt) {
 
 #ifndef LINEAR_ONLY
 	if (type == RIGIDBODY_TYPE_BOX) {
-		vec3 angAccel = MultiplyVector(torques, InvTensor());
+		math::vec3 angAccel = math::multiplyVector(torques, InvTensor());
 		angVel = angVel + angAccel * dt;
 		angVel = angVel *  damping;
 
@@ -182,35 +182,35 @@ void ApplyImpulse(RigidbodyVolume& A, RigidbodyVolume& B, const CollisionManifol
 	}
 
 #ifndef LINEAR_ONLY
-	vec3 r1 = M.contacts[c] - A.position;
-	vec3 r2 = M.contacts[c] - B.position;
-	mat4 i1 = A.InvTensor();
-	mat4 i2 = B.InvTensor();
+	math::vec3 r1 = M.contacts[c] - A.position;
+	math::vec3 r2 = M.contacts[c] - B.position;
+	math::mat4 i1 = A.InvTensor();
+	math::mat4 i2 = B.InvTensor();
 #endif
 
 	// Relative velocity
 #ifndef LINEAR_ONLY
-	vec3 relativeVel = (B.velocity + Cross(B.angVel, r2)) - (A.velocity + Cross(A.angVel, r1));
+	math::vec3 relativeVel = (B.velocity + math::cross(B.angVel, r2)) - (A.velocity + math::cross(A.angVel, r1));
 #else
 	vec3 relativeVel = B.velocity - A.velocity;
 #endif
 	// Relative collision normal
-	vec3 relativeNorm = M.normal;
-	Normalize(relativeNorm);
+	math::vec3 relativeNorm = M.normal;
+	math::normalized(relativeNorm);
 
 	// Moving away from each other? Do nothing!
-	if (Dot(relativeVel, relativeNorm) > 0.0f) {
+	if (math::dot(relativeVel, relativeNorm) > 0.0f) {
 		return;
 	}
 
 	float e = fminf(A.cor, B.cor);
 
-	float numerator = (-(1.0f + e) * Dot(relativeVel, relativeNorm));
+	float numerator = (-(1.0f + e) * math::dot(relativeVel, relativeNorm));
 	float d1 = invMassSum;
 #ifndef LINEAR_ONLY
-	vec3 d2 = Cross(MultiplyVector(Cross(r1, relativeNorm), i1), r1);
-	vec3 d3 = Cross(MultiplyVector(Cross(r2, relativeNorm), i2), r2);
-	float denominator = d1 + Dot(relativeNorm, d2 + d3);
+	math::vec3 d2 = math::cross(math::multiplyVector(math::cross(r1, relativeNorm), i1), r1);
+	math::vec3 d3 = math::cross(math::multiplyVector(math::cross(r2, relativeNorm), i2), r2);
+	float denominator = d1 + math::dot(relativeNorm, d2 + d3);
 #else
 	float denominator = d1;
 #endif
@@ -220,28 +220,28 @@ void ApplyImpulse(RigidbodyVolume& A, RigidbodyVolume& B, const CollisionManifol
 		j /= (float)M.contacts.size();
 	}
 
-	vec3 impulse = relativeNorm * j;
+	math::vec3 impulse = relativeNorm * j;
 	A.velocity = A.velocity - impulse *  invMass1;
 	B.velocity = B.velocity + impulse *  invMass2;
 
 #ifndef LINEAR_ONLY
-	A.angVel = A.angVel - MultiplyVector(Cross(r1, impulse), i1);
-	B.angVel = B.angVel + MultiplyVector(Cross(r2, impulse), i2);
+	A.angVel = A.angVel - math::multiplyVector(math::cross(r1, impulse), i1);
+	B.angVel = B.angVel + math::multiplyVector(math::cross(r2, impulse), i2);
 #endif
 
 	// Friction
-	vec3 t = relativeVel - (relativeNorm * Dot(relativeVel, relativeNorm));
-	if (CMP(MagnitudeSq(t), 0.0f)) {
+	math::vec3 t = relativeVel - (relativeNorm * math::dot(relativeVel, relativeNorm));
+	if (CMP(math::lengthSq(t), 0.0f)) {
 		return;
 	}
-	Normalize(t);
+	math::normalized(t);
 
-	numerator = -Dot(relativeVel, t);
+	numerator = -math::dot(relativeVel, t);
 	d1 = invMassSum;
 #ifndef LINEAR_ONLY
-	d2 = Cross(MultiplyVector(Cross(r1, t), i1), r1);
-	d3 = Cross(MultiplyVector(Cross(r2, t), i2), r2);
-	denominator = d1 + Dot(t, d2 + d3);
+	d2 = math::cross(math::multiplyVector(math::cross(r1, t), i1), r1);
+	d3 = math::cross(math::multiplyVector(math::cross(r2, t), i2), r2);
+	denominator = d1 + math::dot(t, d2 + d3);
 #else
 	denominator = d1;
 #endif
@@ -255,7 +255,7 @@ void ApplyImpulse(RigidbodyVolume& A, RigidbodyVolume& B, const CollisionManifol
 		return;
 	}
 
-	vec3 tangentImpuse;
+	math::vec3 tangentImpuse;
 #ifdef DYNAMIC_FRICTION
 	float sf = sqrtf(A.staticFriction * B.staticFriction);
 	float df = sqrtf(A.dynamicFriction * B.dynamicFriction);
@@ -280,7 +280,7 @@ void ApplyImpulse(RigidbodyVolume& A, RigidbodyVolume& B, const CollisionManifol
 	B.velocity = B.velocity + tangentImpuse *  invMass2;
 
 #ifndef LINEAR_ONLY
-	A.angVel = A.angVel - MultiplyVector(Cross(r1, tangentImpuse), i1);
-	B.angVel = B.angVel + MultiplyVector(Cross(r2, tangentImpuse), i2);
+	A.angVel = A.angVel - math::multiplyVector(math::cross(r1, tangentImpuse), i1);
+	B.angVel = B.angVel + math::multiplyVector(math::cross(r2, tangentImpuse), i2);
 #endif
 }

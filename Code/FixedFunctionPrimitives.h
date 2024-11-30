@@ -5,7 +5,7 @@
 #include "Geometry3D.h"
 #include "ObjLoader.h"
 #include "Scene.h"
-#include "matrices.h"
+#include "math_config.h"
 
 // 2D Geometry
 void Render(const Point2D& point); 

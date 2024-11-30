@@ -17,12 +17,12 @@ void Render(const Mesh& mesh) {
 	glBegin(GL_TRIANGLES);
 
 	for (int i = 0; i < mesh.numTriangles; ++i) {
-		vec3 normal = Normalized(Cross(mesh.triangles[i].GetC() - mesh.triangles[i].GetA(), mesh.triangles[i].GetB() - mesh.triangles[i].GetA()));
-		glNormal3fv(normal.asArray);
+		math::vec3 normal = math::normalized(math::cross(mesh.triangles[i].GetC() - mesh.triangles[i].GetA(), mesh.triangles[i].GetB() - mesh.triangles[i].GetA()));
+		glNormal3fv(glm::value_ptr(normal));
 
-		glVertex3fv(mesh.triangles[i].GetA().asArray);
-		glVertex3fv(mesh.triangles[i].GetB().asArray);
-		glVertex3fv(mesh.triangles[i].GetC().asArray);
+		glVertex3fv(glm::value_ptr(mesh.triangles[i].GetA()));
+		glVertex3fv(glm::value_ptr(mesh.triangles[i].GetB()));
+		glVertex3fv(glm::value_ptr(mesh.triangles[i].GetC()));
 	}
 
 	glEnd();
@@ -31,8 +31,8 @@ void Render(const Mesh& mesh) {
 void Render(const Model& model) {
 	glPushMatrix();
 
-	mat4 world = GetWorldMatrix(model);
-	glMultMatrixf(world.asArray);
+	math::mat4 world = GetWorldMatrix(model);
+	glMultMatrixf(glm::value_ptr(world));
 	if (model.GetMesh() != 0) {
 		Render(*(model.GetMesh()));
 	}
@@ -54,14 +54,14 @@ void Render(const CollisionManifold& manifold) {
 
 	glColor3f(0.0f, 1.0f, 0.0f);
 	glBegin(GL_LINES);
-	vec3 center = vec3();
+	math::vec3 center = math::vec3();
 	for (int i = 0; i < manifold.contacts.size(); ++i) {
-		vec3 start = manifold.contacts[i];
-		vec3 end = start + manifold.normal * manifold.depth;
+		math::vec3 start = manifold.contacts[i];
+		math::vec3 end = start + manifold.normal * manifold.depth;
 		center = center + start;
 
-		glVertex3fv(start.asArray);
-		glVertex3fv(end.asArray);
+		glVertex3fv(glm::value_ptr(start));
+		glVertex3fv(glm::value_ptr(end));
 	}
 	glEnd();
 
@@ -73,27 +73,27 @@ void Render(const CollisionManifold& manifold) {
 
 	glColor3f(0.0f, 0.0f, 1.0f);
 	glBegin(GL_LINES);
-	vec3 start = center;
-	vec3 end = center + manifold.normal;
+	math::vec3 start = center;
+	math::vec3 end = center + manifold.normal;
 
-	glVertex3fv(start.asArray);
-	glVertex3fv(end.asArray);
+	glVertex3fv(glm::value_ptr(start));
+	glVertex3fv(glm::value_ptr(end));
 	glEnd();
 
 }
 
 void RenderNormals(const Frustum& frustum) {
-	vec3 NTL = Intersection(frustum.Near(), frustum.Top(), frustum.Left());
-	vec3 NTR = Intersection(frustum.Near(), frustum.Top(), frustum.Right());
-	vec3 NBL = Intersection(frustum.Near(), frustum.Bottom(), frustum.Left());
-	vec3 NBR = Intersection(frustum.Near(), frustum.Bottom(), frustum.Right());
+	math::vec3 NTL = Intersection(frustum.Near(), frustum.Top(), frustum.Left());
+	math::vec3 NTR = Intersection(frustum.Near(), frustum.Top(), frustum.Right());
+	math::vec3 NBL = Intersection(frustum.Near(), frustum.Bottom(), frustum.Left());
+	math::vec3 NBR = Intersection(frustum.Near(), frustum.Bottom(), frustum.Right());
 
-	vec3 FTL = Intersection(frustum.Far(), frustum.Top(), frustum.Left());
-	vec3 FTR = Intersection(frustum.Far(), frustum.Top(), frustum.Right());
-	vec3 FBL = Intersection(frustum.Far(), frustum.Bottom(), frustum.Left());
-	vec3 FBR = Intersection(frustum.Far(), frustum.Bottom(), frustum.Right());
+	math::vec3 FTL = Intersection(frustum.Far(), frustum.Top(), frustum.Left());
+	math::vec3 FTR = Intersection(frustum.Far(), frustum.Top(), frustum.Right());
+	math::vec3 FBL = Intersection(frustum.Far(), frustum.Bottom(), frustum.Left());
+	math::vec3 FBR = Intersection(frustum.Far(), frustum.Bottom(), frustum.Right());
 
-	vec3 centers[] = {
+	math::vec3 centers[] = {
 		(NTR + NTL + FTR + FTL) * 0.25f, // Top
 		(NBR + NBL + FBR + FBL) * 0.25f, // Bottom
 		(NTL + NBL + FTL + FBL) * 0.25f,// Left
@@ -104,68 +104,68 @@ void RenderNormals(const Frustum& frustum) {
 
 	glBegin(GL_LINES);
 	for (int i = 0; i < 6; ++i) {
-		vec3 p1 = centers[i] + frustum.planes[i].normal * 0.5f;
-		glVertex3fv(centers[i].asArray);
-		glVertex3fv(p1.asArray);
+	math::vec3 p1 = centers[i] + frustum.planes[i].normal * 0.5f;
+		glVertex3fv(glm::value_ptr(centers[i]));
+		glVertex3fv(glm::value_ptr(p1));
 	}
 	glEnd();
 
 	for (int i = 0; i < 6; ++i) {
-		vec3 p1 = centers[i] + frustum.planes[i].normal * 0.5f;
-		vec3 p2 = p1 + frustum.planes[i].normal * 0.25f;
+		math::vec3 p1 = centers[i] + frustum.planes[i].normal * 0.5f;
+		math::vec3 p2 = p1 + frustum.planes[i].normal * 0.25f;
 
-		mat4 orient = FastInverse(LookAt(p1, p2, vec3(0, 1, 0)));
-		mat4 rotate = Rotation(90.0f, 0.0f, 0.0f);
+		math::mat4 orient = math::fastInverse(math::lookAt(p1, p2, math::vec3(0, 1, 0)));
+		math::mat4 rotate = math::rotation(90.0f, 0.0f, 0.0f);
 
 		glPushMatrix();
-		glMultMatrixf((rotate * orient).asArray);
+		glMultMatrixf(glm::value_ptr((rotate * orient)));
 		FixedFunctionCone(3, 3.0f, 0.1f);
 		glPopMatrix();
 	}
 }
 
 void Render(const Frustum& frustum) {
-	vec3 NTL = Intersection(frustum.Near(), frustum.Top(), frustum.Left());
-	vec3 NTR = Intersection(frustum.Near(), frustum.Top(), frustum.Right());
-	vec3 NBL = Intersection(frustum.Near(), frustum.Bottom(), frustum.Left());
-	vec3 NBR = Intersection(frustum.Near(), frustum.Bottom(), frustum.Right());
+	math::vec3 NTL = Intersection(frustum.Near(), frustum.Top(), frustum.Left());
+	math::vec3 NTR = Intersection(frustum.Near(), frustum.Top(), frustum.Right());
+	math::vec3 NBL = Intersection(frustum.Near(), frustum.Bottom(), frustum.Left());
+	math::vec3 NBR = Intersection(frustum.Near(), frustum.Bottom(), frustum.Right());
 
-	vec3 FTL = Intersection(frustum.Far(), frustum.Top(), frustum.Left());
-	vec3 FTR = Intersection(frustum.Far(), frustum.Top(), frustum.Right());
-	vec3 FBL = Intersection(frustum.Far(), frustum.Bottom(), frustum.Left());
-	vec3 FBR = Intersection(frustum.Far(), frustum.Bottom(), frustum.Right());
+	math::vec3 FTL = Intersection(frustum.Far(), frustum.Top(), frustum.Left());
+	math::vec3 FTR = Intersection(frustum.Far(), frustum.Top(), frustum.Right());
+	math::vec3 FBL = Intersection(frustum.Far(), frustum.Bottom(), frustum.Left());
+	math::vec3 FBR = Intersection(frustum.Far(), frustum.Bottom(), frustum.Right());
 	
 	glBegin(GL_LINES);
 
 	// Near
-	glVertex3fv(NTL.asArray);
-	glVertex3fv(NTR.asArray);
-	glVertex3fv(NTR.asArray);
-	glVertex3fv(NBR.asArray);
-	glVertex3fv(NBR.asArray);
-	glVertex3fv(NBL.asArray);
-	glVertex3fv(NBL.asArray);
-	glVertex3fv(NTL.asArray);
+	glVertex3fv(glm::value_ptr(NTL));
+	glVertex3fv(glm::value_ptr(NTR));
+	glVertex3fv(glm::value_ptr(NTR));
+	glVertex3fv(glm::value_ptr(NBR));
+	glVertex3fv(glm::value_ptr(NBR));
+	glVertex3fv(glm::value_ptr(NBL));
+	glVertex3fv(glm::value_ptr(NBL));
+	glVertex3fv(glm::value_ptr(NTL));
 
 	// Far
-	glVertex3fv(FTL.asArray);
-	glVertex3fv(FTR.asArray);
-	glVertex3fv(FTR.asArray);
-	glVertex3fv(FBR.asArray);
-	glVertex3fv(FBR.asArray);
-	glVertex3fv(FBL.asArray);
-	glVertex3fv(FBL.asArray);
-	glVertex3fv(FTL.asArray);
+	glVertex3fv(glm::value_ptr(FTL));
+	glVertex3fv(glm::value_ptr(FTR));
+	glVertex3fv(glm::value_ptr(FTR));
+	glVertex3fv(glm::value_ptr(FBR));
+	glVertex3fv(glm::value_ptr(FBR));
+	glVertex3fv(glm::value_ptr(FBL));
+	glVertex3fv(glm::value_ptr(FBL));
+	glVertex3fv(glm::value_ptr(FTL));
 
 	// Edges
-	glVertex3fv(NTL.asArray);
-	glVertex3fv(FTL.asArray);
-	glVertex3fv(NTR.asArray);
-	glVertex3fv(FTR.asArray);
-	glVertex3fv(NBL.asArray);
-	glVertex3fv(FBL.asArray);
-	glVertex3fv(NBR.asArray);
-	glVertex3fv(FBR.asArray);
+	glVertex3fv(glm::value_ptr(NTL));
+	glVertex3fv(glm::value_ptr(FTL));
+	glVertex3fv(glm::value_ptr(NTR));
+	glVertex3fv(glm::value_ptr(FTR));
+	glVertex3fv(glm::value_ptr(NBL));
+	glVertex3fv(glm::value_ptr(FBL));
+	glVertex3fv(glm::value_ptr(NBR));
+	glVertex3fv(glm::value_ptr(FBR));
 
 
 	glEnd();
@@ -179,21 +179,21 @@ void Render(const Plane& plane, float scale) {
 }
 
 void Render(const Plane& plane) {
-	vec3 forward = plane.normal;
-	vec3 up = vec3(0, 1, 0);
-	if (CMP(MagnitudeSq(Cross(up, plane.normal)), 0)) {
-		up = vec3(1, 0, 0);
-		if (CMP(MagnitudeSq(Cross(up, plane.normal)), 0)) {
-			up = vec3(0, 0, 1);
+	math::vec3 forward = plane.normal;
+	math::vec3 up = math::vec3(0, 1, 0);
+	if (CMP(math::lengthSq(math::cross(up, plane.normal)), 0)) {
+		up = math::vec3(1, 0, 0);
+		if (CMP(math::lengthSq(math::cross(up, plane.normal)), 0)) {
+			up = math::vec3(0, 0, 1);
 		}
 	}
-	vec3 right = Cross(up, forward);
-	up = Cross(forward, right);
+	math::vec3 right = math::cross(up, forward);
+	up = math::cross(forward, right);
 
-	vec3 n = Normalized(plane.normal);
+	math::vec3 n = math::normalized(plane.normal);
 	float d = plane.distance;
-	vec3 tx = Normalized(right);
-	vec3 ty = Normalized(up);
+	math::vec3 tx = math::normalized(right);
+	math::vec3 ty = math::normalized(up);
 
 	glBegin(GL_QUADS);
 		glVertex3f((tx.x + ty.x) + n.x * d, (tx.y + ty.y) + n.y * d, (tx.z + ty.z) + n.z * d);
@@ -212,8 +212,8 @@ void Render(const Plane& plane) {
 
 	glColor3f(0.0f, 0.0f, 0.0f);
 	glBegin(GL_LINES);
-	vec3 start = n * d;
-	vec3 end = start + n;
+	math::vec3 start = n * d;
+	math::vec3 end = start + n;
 	glVertex3f(start.x, start.y, start.z);
 	glVertex3f(end.x, end.y, end.z);
 	glEnd();
@@ -234,9 +234,9 @@ void Render(const Triangle& triangle, bool oneSided) {
 		glVertex3f(triangle.GetB().x, triangle.GetB().y, triangle.GetB().z);
 	}
 	else {
-		vec3 ab = triangle.GetA() - triangle.GetA();
-		vec3 ac = triangle.GetA() - triangle.GetC();
-		vec3 norm = Normalized(Cross(ac, ab));
+		math::vec3 ab = triangle.GetA() - triangle.GetA();
+	  math::vec3 ac = triangle.GetA() - triangle.GetC();
+		math::vec3 norm = math::normalized(math::cross(ac, ab));
 		glNormal3f(norm.x, norm.y, norm.z);
 	}
 
@@ -251,7 +251,7 @@ void Render(const Circle& circle) {
 	glBegin(GL_LINE_LOOP);
 
 	for (int i = 0; i < 360; ++i) {
-		glVertex2f(circle.position.x + cosf(DEG2RAD(i)) * circle.radius, circle.position.y + sinf(DEG2RAD(i)) * circle.radius);
+		glVertex2f(circle.position.x + cosf(math::radians(i)) * circle.radius, circle.position.y + sinf(math::radians(i)) * circle.radius);
 	}
 
 	glEnd();
@@ -274,8 +274,8 @@ void Render(const Line& line) {
 void Render(const std::vector<Line>& edges) {
 	glBegin(GL_LINES);
 	for (int i = 0; i < edges.size(); ++i) {
-		vec3 p1 = edges[i].start;
-		vec3 p2 = edges[i].end;
+		math::vec3 p1 = edges[i].start;
+		math::vec3 p2 = edges[i].end;
 		glVertex3f(p1.x, p1.y, p1.z);
 		glVertex3f(p2.x, p2.y, p2.z);
 	}
@@ -319,24 +319,18 @@ void Render(const Sphere& sphere) {
 void Render(const OBB& obb) {
 	glPushMatrix();
 
-	mat4 scale = Scale(obb.size);
-	mat4 rotation = FromMat3(obb.orientation);
-	mat4 translation = Translation(obb.position);
+	math::mat4 scale = math::scale(obb.size);
+	math::mat4 rotation = math::fromMat3(obb.orientation);
+	math::mat4 translation = math::translation(obb.position);
 
-	// SRT: Scale First, Rotate Second, Translate Last
-	// orientation = roll * pitch * yaw;
-	mat4 transform = scale * rotation * translation;
-	
-	// Using GL pipe stuff:
-	// glTranslate(obb.position.x, obb.position.y, obb.position.z);
-	// Orientation = yaw * pitch * roll
-	// glRotate??? Probably do a matrix multiplication instead
-	// glScale(obb.size.x, obb.size.y, obb.size.z);
+	// Corriger l'ordre : Translation * Rotation * Scale
+	math::mat4 transform = translation * rotation * scale;
 
-	glMultMatrixf(transform.asArray);
+	glMultMatrixf(glm::value_ptr(transform));
 	FixedFunctionCube();
 	glPopMatrix();
 }
+
 
 void Render(const AABB& aabb) {
 	glPushMatrix();
@@ -357,8 +351,8 @@ void RenderWithQuads(const AABB& aabb) {
 }
 
 void Render(const Rectangle2D& rect) {
-	vec2 min = GetMin(rect);
-	vec2 max = GetMax(rect);
+	math::vec2 min = GetMin(rect);
+	math::vec2 max = GetMax(rect);
 
 	glBegin(GL_LINES); 
 	glVertex3f(min[0], min[1], 0.0f);
@@ -388,8 +382,8 @@ void Render(const OrientedRectangle& rect) {
 	glTranslatef(rect.position.x, rect.position.y, 0.0f);
 	glRotatef(rect.rotation, 0.0f, 0.0f, 1.0f);
 
-	vec2 min = vec2(-rect.halfExtents.x, -rect.halfExtents.y);
-	vec2 max = vec2(+rect.halfExtents.x, +rect.halfExtents.y);
+	math::vec2 min = math::vec2(-rect.halfExtents.x, -rect.halfExtents.y);
+	math::vec2 max = math::vec2(+rect.halfExtents.x, +rect.halfExtents.y);
 	
 	glBegin(GL_LINES);
 	glVertex3f(min[0], min[1], 0.0f);

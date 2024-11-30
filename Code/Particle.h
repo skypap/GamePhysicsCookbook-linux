@@ -15,16 +15,16 @@
 //#define ACCURATE_EULER_INTEGRATION
 
 class Particle : public Rigidbody {
-	vec3 position;
-	vec3 oldPosition;
-	vec3 forces;
+	math::vec3 position;
+	math::vec3 oldPosition;
+	math::vec3 forces;
 
-	vec3 gravity;
+	math::vec3 gravity;
 	float friction;
 	float bounce;
 
 #ifdef EULER_INTEGRATION
-	vec3 velocity;
+	math::vec3 velocity;
 #endif
 	float mass;
 public:
@@ -35,16 +35,16 @@ public:
 	void ApplyForces();
 	void SolveConstraints(const std::vector<OBB>& constraints);
 
-	void SetPosition(const vec3& pos);
-	vec3 GetPosition();
+	void SetPosition(const math::vec3& pos);
+	math::vec3 GetPosition();
 
 	void SetBounce(float b);
 	float GetBounce();
 
-	void AddImpulse(const vec3& impulse);
+	void AddImpulse(const math::vec3& impulse);
 	float InvMass();
 	void SetMass(float m);
-	vec3 GetVelocity();
+	math::vec3 GetVelocity();
 	void SetFriction(float f);
 };
 

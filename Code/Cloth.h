@@ -14,7 +14,7 @@ protected:
 	float clothSize;
 public:
 	// Public API
-	void Initialize(int gridSize, float distance, const vec3& position);
+	void Initialize(int gridSize, float distance, const math::vec3& position);
 
 	void SetStructuralSprings(float k, float b);
 	void SetShearSprings(float k, float b);

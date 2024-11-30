@@ -144,15 +144,15 @@ void QuadTreeNode::Split() {
 		return;
 	}
 
-	vec2 min = GetMin(nodeBounds);
-	vec2 max = GetMax(nodeBounds);
-	vec2 center = min + ((max - min) * 0.5f);
+	math::vec2 min = GetMin(nodeBounds);
+	math::vec2 max = GetMax(nodeBounds);
+	math::vec2 center = min + ((max - min) * 0.5f);
 
 	Rectangle2D childAreas[] = {
-		Rectangle2D(FromMinMax(vec2(min.x, min.y), vec2(center.x, center.y))),
-		Rectangle2D(FromMinMax(vec2(center.x, min.y), vec2(max.x, center.y))),
-		Rectangle2D(FromMinMax(vec2(center.x, center.y), vec2(max.x, max.y))),
-		Rectangle2D(FromMinMax(vec2(min.x, center.y), vec2(center.x, max.y))),
+		Rectangle2D(FromMinMax(math::vec2(min.x, min.y), math::vec2(center.x, center.y))),
+		Rectangle2D(FromMinMax(math::vec2(center.x, min.y), math::vec2(max.x, center.y))),
+		Rectangle2D(FromMinMax(math::vec2(center.x, center.y), math::vec2(max.x, max.y))),
+		Rectangle2D(FromMinMax(math::vec2(min.x, center.y), math::vec2(center.x, max.y))),
 	};
 	for (int i = 0; i < 4; ++i) {
 		children.push_back(QuadTreeNode(childAreas[i]));

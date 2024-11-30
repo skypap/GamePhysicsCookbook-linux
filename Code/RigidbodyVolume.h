@@ -3,21 +3,21 @@
 
 #include "Rigidbody.h"
 
-#define GRAVITY_CONST vec3(0.0f, -9.82f, 0.0f)
+#define GRAVITY_CONST math::vec3(0.0f, -9.82f, 0.0f)
 
 class RigidbodyVolume : public Rigidbody {
 public:
-	vec3 position;
-	vec3 velocity;
+	math::vec3 position;
+	math::vec3 velocity;
 
 #ifndef LINEAR_ONLY
-	vec3 orientation;
-	vec3 angVel;
+	math::vec3 orientation;
+	math::vec3 angVel;
 #endif
 
-	vec3 forces; // sumForces
+	math::vec3 forces; // sumForces
 #ifndef LINEAR_ONLY
-	vec3 torques; // Sum torques
+	math::vec3 torques; // Sum torques
 #endif
 
 				  //vec3 inertia;
@@ -65,15 +65,15 @@ public:
 
 	float InvMass();
 #ifndef LINEAR_ONLY
-	mat4 InvTensor();
+	math::mat4 InvTensor();
 #endif
 
 	virtual void ApplyForces();
 	void SynchCollisionVolumes();
 
-	virtual void AddLinearImpulse(const vec3& impulse);
+	virtual void AddLinearImpulse(const math::vec3& impulse);
 #ifndef LINEAR_ONLY
-	virtual void AddRotationalImpulse(const vec3& point, const vec3& impulse);
+	virtual void AddRotationalImpulse(const math::vec3& point, const math::vec3& impulse);
 #endif
 };
 

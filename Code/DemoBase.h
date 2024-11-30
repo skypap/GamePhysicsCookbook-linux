@@ -12,9 +12,9 @@ protected:
 	bool mouseLeftDown;
 	bool mouseRightDown;
 	bool mouseMiddleDown;
-	vec2 mouseDelta;
-	vec2 mousePos;
-	vec2 size;
+	math::vec2 mouseDelta;
+	math::vec2 mousePos;
+	math::vec2 size;
 	bool configHelpWindow;
 public:
 	OrbitCamera camera;
@@ -29,7 +29,7 @@ public:
 	virtual void ImGUI();
 	inline virtual void Shutdown() { }
 
-	void SetMouseState(bool left, bool middle, bool right, const vec2& delta, const vec2& mouse);
+	void SetMouseState(bool left, bool middle, bool right, const math::vec2& delta, const math::vec2& mouse);
 };
 
 #endif 

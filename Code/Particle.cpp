@@ -6,7 +6,7 @@ Particle::Particle() {
 	type = RIGIDBODY_TYPE_PARTICLE;
 	friction = 0.95f;
 	bounce = 0.7f;
-	gravity = vec3(0.0f, -9.82f, 0.0f);
+	gravity = math::vec3(0.0f, -9.82f, 0.0f);
 
 #ifdef EULER_INTEGRATION
 	mass = 1.0f;
@@ -16,7 +16,7 @@ Particle::Particle() {
 void Particle::Update(float deltaTime) {
 #ifdef EULER_INTEGRATION
 	oldPosition = position;
-	vec3 acceleration = forces *InvMass();
+	math::vec3 acceleration = forces *InvMass();
 	#ifdef ACCURATE_EULER_INTEGRATION
 		vec3 oldVelocity = velocity;
 		velocity = velocity * friction + acceleration * deltaTime;
@@ -55,7 +55,7 @@ void Particle::SolveConstraints(const std::vector<OBB>& constraints) {
 #ifndef EULER_INTEGRATION
 			vec3 velocity = position - oldPosition;
 #endif
-			vec3 direction = Normalized(velocity);
+			math::vec3 direction = math::normalized(velocity);
 			Ray ray(oldPosition, direction);
 			RaycastResult result;
 
@@ -63,8 +63,8 @@ void Particle::SolveConstraints(const std::vector<OBB>& constraints) {
 				// Place object just a little above collision result
 				position = result.point + result.normal * 0.003f;
 
-				vec3 vn = result.normal * Dot(result.normal, velocity);
-				vec3 vt = velocity - vn;
+				math::vec3 vn = result.normal * math::dot(result.normal, velocity);
+				math::vec3 vt = velocity - vn;
 
 #ifdef EULER_INTEGRATION
 				oldPosition = position;
@@ -78,12 +78,12 @@ void Particle::SolveConstraints(const std::vector<OBB>& constraints) {
 	}
 }
 
-void Particle::SetPosition(const vec3& pos) {
+void Particle::SetPosition(const math::vec3& pos) {
 	position = pos;
 	oldPosition = pos;
 }
 
-vec3 Particle::GetPosition() {
+math::vec3 Particle::GetPosition() {
 	return position;
 }
 
@@ -95,7 +95,7 @@ float Particle::GetBounce() {
 	return bounce;
 }
 
-void Particle::AddImpulse(const vec3& impulse) {
+void Particle::AddImpulse(const math::vec3& impulse) {
 #ifdef EULER_INTEGRATION
 	velocity = velocity + impulse;
 #else
@@ -114,7 +114,7 @@ void Particle::SetMass(float m) {
 	mass = m;
 }
 
-vec3 Particle::GetVelocity() {
+math::vec3 Particle::GetVelocity() {
 #ifdef EULER_INTEGRATION
 	return velocity;
 #else

@@ -20,9 +20,9 @@ void ConservationOfMomentum::Initialize(int width, int height) {
 	float val[] = { 0.5f, 1.0f, -1.5f, 0.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, val);
 
-	camera.SetTarget(vec3(3.75622f, 2.98255f, 0.0f));
+	camera.SetTarget(math::vec3(3.75622f, 2.98255f, 0.0f));
 	camera.SetZoom(12.0f);
-	camera.SetRotation(vec2(-67.9312f, 19.8f));
+	camera.SetRotation(math::vec2(-67.9312f, 19.8f));
 
 	ResetDemo();
 }
@@ -40,15 +40,15 @@ void ConservationOfMomentum::ResetDemo() {
 		if (i == 4) {
 			pos = (float)i * (bodies[i].sphere.radius + 0.00001f) * 3.0f;
 		}
-		bodies[i].position = vec3(pos, 1.16, 0.0f);
+		bodies[i].position = math::vec3(pos, 1.16, 0.0f);
 		physicsSystem.AddRigidbody(&bodies[i]);
 	}
-	vec3 impulse = vec3(-bodies[4].position.x, 0.0f, 0.0f);
-	Normalize(impulse);
+	math::vec3 impulse = math::vec3(-bodies[4].position.x, 0.0f, 0.0f);
+	math::normalized(impulse);
 	bodies[4].AddLinearImpulse(impulse * 20.0f);
 
 	groundBox = RigidbodyVolume(RIGIDBODY_TYPE_BOX);
-	groundBox.box.size = vec3(15.0f, 0.15f, 15.0f);
+	groundBox.box.size = math::vec3(15.0f, 0.15f, 15.0f);
 	groundBox.mass = 0.0f;
 
 	physicsSystem.AddRigidbody(&groundBox);
@@ -67,8 +67,8 @@ float ConservationOfMomentum::Random(float min, float max) {
 	return (random*range) + min;
 }
 
-vec3 ConservationOfMomentum::Random(vec3 min, vec3 max) {
-	vec3 result;
+math::vec3 ConservationOfMomentum::Random(math::vec3 min, math::vec3 max) {
+	math::vec3 result;
 	result.x = Random(min.x, max.x);
 	result.y = Random(min.y, max.y);
 	result.z = Random(min.z, max.z);

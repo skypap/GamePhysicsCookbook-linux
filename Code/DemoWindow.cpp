@@ -19,7 +19,7 @@ static DemoWindow g_WindowInstance("Physics Sandbox", 800, 600);
 void DemoWindow::OnInitialize() {
 	GLWindow::OnInitialize();
 
-	m_prevMousePos = vec2(0, 0);
+	m_prevMousePos = math::vec2(0, 0);
 	m_selectedDemo = -1;
 	m_pDemo = 0;
 	imgui_init = true;
@@ -43,8 +43,8 @@ void DemoWindow::OnRender() {
 	GLWindow::OnRender();
 
 	if (m_pDemo != 0) {
-		mat4 view = m_pDemo->camera.GetViewMatrix();
-		SetGLModelView(view.asArray);
+		math::mat4 view = m_pDemo->camera.GetViewMatrix();
+		SetGLModelView(glm::value_ptr(view));
 
 		m_pDemo->Render();
 	}
@@ -55,11 +55,11 @@ void DemoWindow::ApplyDemoCamera() {
 		return;
 	}
 
-	mat4 projection = m_pDemo->camera.GetProjectionMatrix();
-	mat4 view = m_pDemo->camera.GetViewMatrix();
+	math::mat4 projection = m_pDemo->camera.GetProjectionMatrix();
+	math::mat4 view = m_pDemo->camera.GetViewMatrix();
 
-	SetGLProjection(projection.asArray);
-	SetGLModelView(view.asArray);
+	SetGLProjection(glm::value_ptr(projection));
+	SetGLModelView(glm::value_ptr(view));
 }
 
 void DemoWindow::OnUpdate(float deltaTime) {
@@ -157,8 +157,8 @@ void DemoWindow::OnFixedUpdate(float deltaTime) {
 	bool middleDown = MouseButonDown(MOUSE_MIDDLE);
 	bool rightDown = MouseButonDown(MOUSE_RIGHT);
 
-	vec2 mousePos = GetMousePosition();
-	vec2 mouseDelta = mousePos - m_prevMousePos;
+	math::vec2 mousePos = GetMousePosition();
+	math::vec2 mouseDelta = mousePos - m_prevMousePos;
 	mouseDelta.x /= (float)GetWidth();
 	mouseDelta.y /= (float)GetHeight();
 

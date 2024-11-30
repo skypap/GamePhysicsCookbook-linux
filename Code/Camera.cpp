@@ -12,12 +12,12 @@ Camera::Camera() {
 	m_nWidth = 1.0;
 	m_nHeight = 1.0f;
 
-	m_matWorld = mat4();
-	m_matProj = Projection(m_nFov, m_nAspect, m_nNear, m_nFar);
+	m_matWorld = math::mat4();
+	m_matProj =  math::perspective(m_nFov, m_nAspect, m_nNear, m_nFar);
 	m_nProjectionMode = 0;
 }
 
-mat4 Camera::GetWorldMatrix() {
+math::mat4 Camera::GetWorldMatrix() {
 	return m_matWorld;
 	/*mat3 r = Rotation3x3(rotation.x, rotation.y, rotation.z);
 
@@ -33,31 +33,31 @@ mat4 Camera::GetWorldMatrix() {
 }
 
 bool Camera::IsOrthoNormal() {
-	vec3 right = vec3(m_matWorld._11, m_matWorld._12, m_matWorld._13);
-	vec3 up = vec3(m_matWorld._21, m_matWorld._22, m_matWorld._23);
-	vec3 forward = vec3(m_matWorld._31, m_matWorld._32, m_matWorld._33);
+	math::vec3 right = math::vec3(m_matWorld[0][0], m_matWorld[0][1], m_matWorld[0][2]);
+	math::vec3 up = math::vec3(m_matWorld[1][0], m_matWorld[1][1], m_matWorld[1][2]);
+	math::vec3 forward = math::vec3(m_matWorld[2][0], m_matWorld[2][1], m_matWorld[2][2]);
 
-	if (!CMP(Dot(right, right), 1.0f)) {
+	if (!CMP(math::dot(right, right), 1.0f)) {
 		return false; // X axis is not normal
 	}
 
-	if (!CMP(Dot(up, up), 1.0f)) {
+	if (!CMP(math::dot(up, up), 1.0f)) {
 		return false; // Y axis is not normal
 	}
 
-	if (!CMP(Dot(forward, forward), 1.0f)) {
+	if (!CMP(math::dot(forward, forward), 1.0f)) {
 		return false; // Z axis is not normal
 	}
 
-	if (!CMP(Dot(forward, up), 0.0f)) {
+	if (!CMP(math::dot(forward, up), 0.0f)) {
 		return false; // Not perpendicular
 	}
 
-	if (!CMP(Dot(forward, right), 0.0f)) {
+	if (!CMP(math::dot(forward, right), 0.0f)) {
 		return false; // Not perpendicular
 	}
 
-	if (!CMP(Dot(right, up), 0.0f)) {
+	if (!CMP(math::dot(right, up), 0.0f)) {
 		return false; // Not perpendicular
 	}
 
@@ -75,42 +75,40 @@ bool Camera::IsOrthoNormal() {
 }
 
 void Camera::OrthoNormalize() {
-	vec3 right = vec3(m_matWorld._11, m_matWorld._12, m_matWorld._13);
-	vec3 up = vec3(m_matWorld._21, m_matWorld._22, m_matWorld._23);
-	vec3 forward = vec3(m_matWorld._31, m_matWorld._32, m_matWorld._33);
+	math::vec3 right = math::vec3(m_matWorld[0][0], m_matWorld[0][1], m_matWorld[0][2]);
+	math::vec3 up = math::vec3(m_matWorld[1][0], m_matWorld[1][1], m_matWorld[1][2]);
+	math::vec3 forward = math::vec3(m_matWorld[2][0], m_matWorld[2][1], m_matWorld[2][2]);
 
-	vec3 f = Normalized(forward);
-	vec3 r = Normalized(Cross(up, f));
-	vec3 u = Cross(f, r);
+	math::vec3 f = math::normalized(forward);
+	math::vec3 r = math::normalized(math::cross(up, f));
+	math::vec3 u = math::cross(f, r);
 
-	m_matWorld = mat4(
-		r.x, r.y, r.z, 0.0f,
-		u.x, u.y, u.z, 0.0f,
-		f.x, f.y, f.z, 0.0f,
-		m_matWorld._41, m_matWorld._42, m_matWorld._43, 1.0f
+	m_matWorld = math::mat4(
+			r.x, r.y, r.z, 0.0f,
+			u.x, u.y, u.z, 0.0f,
+			f.x, f.y, f.z, 0.0f,
+			m_matWorld[3][0], m_matWorld[3][1], m_matWorld[3][2], 1.0f
 	);
 }
 
-mat4 Camera::GetViewMatrix() {
-	//return Inverse(m_matWorld);
-
+math::mat4 Camera::GetViewMatrix() {
 	if (!IsOrthoNormal()) {
 		OrthoNormalize();
 	}
 
-	mat4 inverse = Transpose(m_matWorld);
-	inverse._41 = inverse._14 = 0.0f;
-	inverse._42 = inverse._24 = 0.0f;
-	inverse._43 = inverse._34 = 0.0f;
+	math::mat4 inverse = math::transpose(m_matWorld);
+	inverse[3][0] = inverse[0][3] = 0.0f;
+	inverse[3][1] = inverse[1][3] = 0.0f;
+	inverse[3][2] = inverse[2][3] = 0.0f;
 
-	vec3 right = vec3(m_matWorld._11, m_matWorld._12, m_matWorld._13);
-	vec3 up = vec3(m_matWorld._21, m_matWorld._22, m_matWorld._23);
-	vec3 forward = vec3(m_matWorld._31, m_matWorld._32, m_matWorld._33);
-	vec3 position = vec3(m_matWorld._41, m_matWorld._42, m_matWorld._43);
+	math::vec3 right = math::vec3(m_matWorld[0][0], m_matWorld[0][1], m_matWorld[0][2]);
+	math::vec3 up = math::vec3(m_matWorld[1][0], m_matWorld[1][1], m_matWorld[1][2]);
+	math::vec3 forward = math::vec3(m_matWorld[2][0], m_matWorld[2][1], m_matWorld[2][2]);
+	math::vec3 position = math::vec3(m_matWorld[3][0], m_matWorld[3][1], m_matWorld[3][2]);
 
-	inverse._41 = -Dot(right, position);
-	inverse._42 = -Dot(up, position);
-	inverse._43 = -Dot(forward, position);
+	inverse[3][0] = -math::dot(right, position);
+	inverse[3][1] = -math::dot(up, position);
+	inverse[3][2] = -math::dot(forward, position);
 
 	return inverse;
 }
@@ -119,7 +117,7 @@ float Camera::GetAspect() {
 	return m_nAspect;
 }
 
-mat4 Camera::GetProjectionMatrix() {
+math::mat4 Camera::GetProjectionMatrix() {
 	return m_matProj;
 }
 
@@ -127,7 +125,7 @@ void Camera::Resize(int width, int height) {
 	m_nAspect = (float)width / (float)height;
 
 	if (m_nProjectionMode == 0) { // Perspective
-		m_matProj = Projection(m_nFov, m_nAspect, m_nNear, m_nFar);
+		m_matProj =  math::perspective(m_nFov, m_nAspect, m_nNear, m_nFar);
 	}
 	else if (m_nProjectionMode == 1) { // Ortho
 		m_nWidth = (float)width;
@@ -136,7 +134,7 @@ void Camera::Resize(int width, int height) {
 		float halfW = m_nWidth * 0.5f;
 		float halfH = m_nHeight * 0.5f;
 
-		m_matProj = Ortho(-halfW, halfW, halfH, -halfH, m_nNear, m_nFar);
+		m_matProj = math::ortho(-halfW, halfW, halfH, -halfH, m_nNear, m_nFar);
 	}
 	// m_nProjectionMode == 2
 		// User defined
@@ -156,7 +154,7 @@ void Camera::Perspective(float fov, float aspect, float zNear, float zFar) {
 	m_nNear = zNear;
 	m_nFar = zFar;
 
-	m_matProj = Projection(fov, aspect, zNear, zFar);
+	m_matProj =  math::perspective(fov, aspect, zNear, zFar);
 	m_nProjectionMode = 0;
 }
 
@@ -169,16 +167,16 @@ void Camera::Orthographic(float width, float height, float zNear, float zFar) {
 	float halfW = width * 0.5f;
 	float halfH = height * 0.5f;
 
-	m_matProj = Ortho(-halfW, halfW, halfH, -halfH, zNear, zFar);
+	m_matProj =  math::ortho(-halfW, halfW, halfH, -halfH, zNear, zFar);
 	m_nProjectionMode = 1;
 }
 
-void Camera::SetProjection(const mat4& projection) {
+void Camera::SetProjection(const math::mat4& projection) {
 	m_matProj = projection;
 	m_nProjectionMode = 2;
 }
 
-void Camera::SetWorld(const mat4& view) {
+void Camera::SetWorld(const math::mat4& view) {
 	m_matWorld = view;
 }
 
@@ -195,17 +193,17 @@ Camera CreateOrthographic(float width, float height, float nearPlane, float farP
 }
 
 OrbitCamera::OrbitCamera() {
-	target = vec3(0, 0, 0);
+	target =math:: vec3(0, 0, 0);
 	zoomDistance = 10.0f;
 	zoomSpeed = 200.0f;
-	rotationSpeed = vec2(250.0f, 120.0f);
-	yRotationLimit = vec2(-20.0f, 80.0f);
-	zoomDistanceLimit = vec2(3.0f, 15.0f);
-	currentRotation = vec2(0, 0);
-	panSpeed = vec2(180.0f, 180.0f);
+	rotationSpeed =math:: vec2(250.0f, 120.0f);
+	yRotationLimit =math:: vec2(-20.0f, 80.0f);
+	zoomDistanceLimit =math:: vec2(3.0f, 15.0f);
+	currentRotation =math:: vec2(0, 0);
+	panSpeed =math:: vec2(180.0f, 180.0f);
 }
 
-void OrbitCamera::Rotate(const vec2& deltaRot, float deltaTime) {
+void OrbitCamera::Rotate(const math::vec2& deltaRot, float deltaTime) {
 	currentRotation.x += deltaRot.x * rotationSpeed.x * zoomDistance* deltaTime;
 	currentRotation.y += deltaRot.y * rotationSpeed.y * zoomDistance * deltaTime;
 
@@ -223,31 +221,31 @@ void OrbitCamera::Zoom(float deltaZoom, float deltaTime) {
 	}
 }
 
-void OrbitCamera::Pan(const vec2& delataPan, float deltaTime) {
-	vec3 right(m_matWorld._11, m_matWorld._12, m_matWorld._13);
+void OrbitCamera::Pan(const math::vec2& delataPan, float deltaTime) {
+	math::vec3 right(m_matWorld[0][0], m_matWorld[0][1], m_matWorld[0][2]);
 
 	// Pan X axis in local space
 	target = target - (right * (delataPan.x * panSpeed.x * deltaTime));
 	// Pan Y Axis in global space
-	target = target + (vec3(0, 1, 0) * (delataPan.y * panSpeed.y * deltaTime));
+	target = target + (math::vec3(0, 1, 0) * (delataPan.y * panSpeed.y * deltaTime));
 
 	// Reset zoom to allow infinate zooming after a motion
 	// This part of the code is not in the book!
 	float midZoom = zoomDistanceLimit.x + (zoomDistanceLimit.y - zoomDistanceLimit.x) * 0.5f;
 	zoomDistance = midZoom - zoomDistance;
-	vec3 rotation = vec3(currentRotation.y, currentRotation.x, 0);
-	mat3 orient = Rotation3x3(rotation.x, rotation.y, rotation.z);
-	vec3 dir = MultiplyVector( vec3(0.0, 0.0, -zoomDistance), orient);
+	math::vec3 rotation = math::vec3(currentRotation.y, currentRotation.x, 0);
+	math::mat3 orient = math::rotation3x3(rotation.x, rotation.y, rotation.z);
+	math::vec3 dir = math::multiplyVector(math::vec3(0.0, 0.0, -zoomDistance), orient);
 	target = target - dir;
 	zoomDistance = midZoom;
 }
 
 void OrbitCamera::Update(float dt) {
-	vec3 rotation = vec3(currentRotation.y, currentRotation.x, 0);
-	mat3 orient = Rotation3x3(rotation.x, rotation.y, rotation.z);
-	vec3 dir = MultiplyVector( vec3(0.0, 0.0, -zoomDistance), orient);
-	vec3 position = /*rotation * vec3(0.0, 0.0, -distance)*/dir + target;
-	m_matWorld = FastInverse(LookAt(position, target, vec3(0, 1, 0)));
+	math::vec3 rotation = math::vec3(currentRotation.y, currentRotation.x, 0);
+	math::mat3 orient = math::rotation3x3(rotation.x, rotation.y, rotation.z);
+	math::vec3 dir = math::multiplyVector(math::vec3(0.0, 0.0, -zoomDistance), orient);
+	math::vec3 position = /*rotation * vec3(0.0, 0.0, -distance)*/dir + target;
+	m_matWorld = math::fastInverse(math::lookAt(position, target, math::vec3(0, 1, 0)));
 }
 
 float OrbitCamera::ClampAngle(float angle, float min, float max) {
@@ -269,37 +267,37 @@ float OrbitCamera::ClampAngle(float angle, float min, float max) {
 Frustum Camera::GetFrustum() {
 	Frustum result;
 
-	mat4 vp = GetViewMatrix() * GetProjectionMatrix();
+	math::mat4 vp = GetViewMatrix() * GetProjectionMatrix();
 
-	vec3 col1(vp._11, vp._21, vp._31);//, vp._41 };
-	vec3 col2(vp._12, vp._22, vp._32);//, vp._42 };
-	vec3 col3(vp._13, vp._23, vp._33);//, vp._43 };
-	vec3 col4(vp._14, vp._24, vp._34);//, vp._44 };
-					
+	math::vec3 col1(vp[0][0], vp[1][0], vp[2][0]);//, vp[3][0] };
+	math::vec3 col2(vp[0][1], vp[1][1], vp[2][1]);//, vp[3][1] };
+	math::vec3 col3(vp[0][2], vp[1][2], vp[2][2]);//, vp[3][2] };
+	math::vec3 col4(vp[0][3], vp[1][3], vp[2][3]);//, vp[3][3] };
+
 	// Find plane magnitudes
-	result.Left().normal	= col4 + col1;
+	result.Left().normal = col4 + col1;
 	result.Right().normal = col4 - col1;
-	result.Bottom().normal= col4 + col2;
-	result.Top().normal	= col4 - col2;
-	result.Near().normal	= /*col4 +*/ col3;
-	result.Far().normal	= col4 - col3;
+	result.Bottom().normal = col4 + col2;
+	result.Top().normal = col4 - col2;
+	result.Near().normal = /*col4 +*/ col3;
+	result.Far().normal = col4 - col3;
 
 	// Find plane distances
-	result.Left().distance	= vp._44 + vp._41;
-	result.Right().distance	= vp._44 - vp._41;
-	result.Bottom().distance	= vp._44 + vp._42;
-	result.Top().distance		= vp._44 - vp._42;
-	result.Near().distance	= /*vp._44 +*/ vp._43;
-	result.Far().distance		= vp._44 - vp._43;
+	result.Left().distance = vp[3][3] + vp[3][0];
+	result.Right().distance = vp[3][3] - vp[3][0];
+	result.Bottom().distance = vp[3][3] + vp[3][1];
+	result.Top().distance = vp[3][3] - vp[3][1];
+	result.Near().distance = /*vp[3][3] +*/ vp[3][2];
+	result.Far().distance = vp[3][3] - vp[3][2];
 
 	// Normalize all 6 planes
 	for (int i = 0; i < 6; ++i) {
-		float mag = 1.0f / Magnitude(result.planes[i].normal);
-		Normalize(result.planes[i].normal);
+		float mag = 1.0f / math::length(result.planes[i].normal);
+		result.planes[i].normal = math::normalized(result.planes[i].normal);
 		result.planes[i].distance *= mag;
 	}
 
-	return result;		   
+	return result;
 }
 
 void OrbitCamera::PrintDebug() {
@@ -308,7 +306,7 @@ void OrbitCamera::PrintDebug() {
 	std::cout << "Rotation: (" << currentRotation.x << ", " << currentRotation.y << ")\n";
 }
 
-void OrbitCamera::SetTarget(const vec3& newTarget) {
+void OrbitCamera::SetTarget(const math::vec3& newTarget) {
 	target = newTarget;
 }
 
@@ -316,6 +314,6 @@ void OrbitCamera::SetZoom(float zoom) {
 	zoomDistance = zoom;
 }
 
-void OrbitCamera::SetRotation(const vec2& rotation) {
+void OrbitCamera::SetRotation(const math::vec2& rotation) {
 	currentRotation = rotation;
 }
