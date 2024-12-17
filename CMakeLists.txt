@@ -5,11 +5,10 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules" ${CMAKE_MODULE_PATH})
-
+include(FetchSDL2)
 # Dependencies
-find_package(SDL2 REQUIRED)
-find_package(GLEW REQUIRED)
-
+#find_package(SDL2 REQUIRED)
+include(FetchGLEW)
 find_package(OpenGL REQUIRED)
 
 # Fetch ImGui
